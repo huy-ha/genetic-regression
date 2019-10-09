@@ -1,0 +1,22 @@
+cmake_minimum_required( VERSION 3.0 )
+
+# project name
+project( genetic_regression )
+
+# flags
+
+# files
+
+# include
+include_directories( ./include ./src ) 
+# add include directories of any other libs above
+# e.g.: ./libs/Randomize/include
+
+# target
+add_executable( gp_regression ./src/main.cpp )
+# add all other cpp files here ?
+
+#external libs
+# add_subdirectory( ./libs/Logger ) only for static 
+#target
+
