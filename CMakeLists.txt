@@ -13,7 +13,7 @@ include_directories( ./include ./src ./src/engine )
 # e.g.: ./libs/Randomize/include
 
 # target
-add_executable( gp_regression ./src/main.cpp ./src/engine/Expression.cpp )
+add_executable( gp_regression ./src/main.cpp ./src/engine/Expression.cpp ./src/engine/Constant.cpp )
 # add all other cpp files here ?
 
 #external libs
