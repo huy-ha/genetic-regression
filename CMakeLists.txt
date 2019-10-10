@@ -8,12 +8,12 @@ project( genetic_regression )
 # files
 
 # include
-include_directories( ./include ./src ) 
+include_directories( ./include ./src ./src/engine ) 
 # add include directories of any other libs above
 # e.g.: ./libs/Randomize/include
 
 # target
-add_executable( gp_regression ./src/main.cpp )
+add_executable( gp_regression ./src/main.cpp ./src/engine/Expression.cpp )
 # add all other cpp files here ?
 
 #external libs
