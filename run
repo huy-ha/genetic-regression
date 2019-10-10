@@ -1,5 +1,5 @@
 #!/usr/bin/bash.exe
 cd build
-cmake --build . --target genetic_regression --config Release
+cmake --build . --target gp_regression --config Release
 cd ..
 build/Release/gp_regression.exe
