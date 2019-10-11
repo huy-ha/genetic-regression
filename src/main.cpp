@@ -4,15 +4,19 @@
 #include "Constant.hpp"
 #include "Sin.hpp"
 #include "Cos.hpp"
+#include <memory>
+#include <time.h>
+
 using namespace std;
 
 int main()
 {
-    Constant k(0);
-    Cos cos_exp;
-    cout << k.ToString() << endl;
-    cos_exp.AddSubexpression(&k);
-    cout << "cos_exp(1) = " << cos_exp(1) << endl;
-    cout << "cos_exp(2) = " << cos_exp(2) << endl;
-    cout << "cos_exp(3) = " << cos_exp(3) << endl;
+    srand(time(NULL));
+
+    for (int i = 0; i < 40; i++)
+    {
+        std::shared_ptr<SymbolicRegression::Expression> random_exp =
+            SymbolicRegression::Expression::GenerateRandomExpression();
+        cout << random_exp->ToString() << endl;
+    }
 }

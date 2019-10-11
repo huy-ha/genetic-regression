@@ -4,7 +4,9 @@
 #include <vector>
 #include <string>
 #include <iostream>
-
+#include <memory>
+namespace SymbolicRegression
+{
 class Expression
 {
 public:
@@ -12,7 +14,10 @@ public:
     float Evaluate(float x);
     float operator()(float x);
     void AddSubexpression(Expression *subexpression);
-    virtual std::string ToString() const = 0;
+    virtual std::string ToString() const;
+    std::shared_ptr<Expression> static GenerateRandomExpression();
+    static float RandomF();
+    static float RandomF(float min, float max);
 
 protected:
     Expression();
@@ -25,8 +30,19 @@ protected:
     std::function<float(float)> m_func = 0;           //function presenting this expression node's function
     std::function<float(float)> m_expressionFunc = 0; // function representing entire expression
     std::vector<Expression *> m_subexpressions;
+    enum ExpressionType
+    {
+        Sin,
+        Cos,
+        Plus,
+        Minus,
+        Multiply,
+        Divide,
+        Constant,
+        Variable
+    };
 };
-
+} // namespace SymbolicRegression
 // std::ostream &operator<<(std::ostream &os, const Expression &e)
 // {
 //     os << e.ToString();
