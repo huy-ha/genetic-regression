@@ -3,56 +3,63 @@
 #include "Constant.hpp"
 #include "Cos.hpp"
 #include "Sin.hpp"
+#include "Plus.hpp"
+#include "Minus.hpp"
+#include "Multiply.hpp"
+#include "Divide.hpp"
+#include "Variable.hpp"
+
 namespace SymbolicRegression
 {
 Expression::Expression()
 {
     m_func = 0;
-    m_expressionFunc = 0;
     m_order = -1;
-}
-
-Expression::Expression(std::function<float(float)> f)
-{
-    m_func = f;
-    m_order = NumArgs(f);
 }
 
 std::shared_ptr<Expression> Expression::GenerateRandomExpression()
 {
-    ExpressionType exp_t = static_cast<ExpressionType>(rand() % 8);
-    switch (exp_t)
+    // prioritize constants
+    if (RandomF() > 0.3f)
     {
-    case ExpressionType::Cos:
-        return std::shared_ptr<Expression>(new SymbolicRegression::Cos());
-    case ExpressionType::Sin:
-        return std::shared_ptr<Expression>(new SymbolicRegression::Sin());
-    case ExpressionType::Constant:
-    default:
-        return std::shared_ptr<Expression>(new SymbolicRegression::Constant());
+        return RandomF() > 0.5f ? std::shared_ptr<Expression>(new SymbolicRegression::Constant()) : std::shared_ptr<Expression>(new SymbolicRegression::Variable());
+    }
+    // consider operators
+
+    //trig functions with low probability
+    if (RandomF() > 0.8f)
+    {
+        // equal probability of cos and sin
+        return RandomF() > 0.5f ? std::shared_ptr<Expression>(new SymbolicRegression::Cos()) : std::shared_ptr<Expression>(new SymbolicRegression::Sin());
+    }
+    float p = RandomF();
+    //equal probabilty of binary opertaors
+    if (p > (3.0f / 4.0f))
+    {
+        return std::shared_ptr<Expression>(new SymbolicRegression::Plus());
+    }
+    else if (p > (2.0f / 4.0f))
+    {
+        return std::shared_ptr<Expression>(new SymbolicRegression::Minus());
+    }
+    else if (p > (1.0f / 4.0f))
+    {
+        return std::shared_ptr<Expression>(new SymbolicRegression::Multiply());
+    }
+    else
+    {
+        return std::shared_ptr<Expression>(new SymbolicRegression::Divide());
     }
 }
 
 std::function<float(float)> Expression::ToFunction()
 {
-    if (m_subexpressions.size() == m_order)
-    {
-        if (m_order == 0)
-            return m_func;
-        auto func = [&](float x) {
-            return m_func(m_subexpressions[0]->ToFunction()(x));
-        };
-        return func;
-    }
-    std::cerr << "ERROR: Wrong subexpressions count!" << std::endl;
-    throw new std::exception("Wrong subexpressions count!");
+    return m_func;
 }
 
 float Expression::Evaluate(float x)
 {
-    if (m_expressionFunc == 0)
-        m_expressionFunc = ToFunction();
-    return m_expressionFunc(x);
+    return m_func(x);
 }
 
 float Expression::operator()(float x)
@@ -60,14 +67,9 @@ float Expression::operator()(float x)
     return Evaluate(x);
 }
 
-void Expression::AddSubexpression(Expression *subexpression)
+void Expression::AddSubexpression(std::shared_ptr<Expression> subexpression)
 {
     m_subexpressions.push_back(subexpression);
-}
-
-std::string Expression::ToString() const
-{
-    return " expression ";
 }
 
 float Expression::RandomF()

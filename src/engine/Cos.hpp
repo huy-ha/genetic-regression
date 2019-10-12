@@ -7,9 +7,9 @@ namespace SymbolicRegression
 class Cos : public Expression
 {
 public:
-    inline Cos() : Expression(cosf)
+    inline Cos() : Expression()
     {
-        m_subexpressions.push_back(new SymbolicRegression::Constant());
+        m_subexpressions.push_back(Expression::GenerateRandomExpression());
     }
     inline virtual std::string ToString() const override
     {
