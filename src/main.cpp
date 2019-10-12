@@ -1,18 +1,28 @@
 #include <iostream>
 #include <math.h>
-#include "Expression.hpp"
+#include "expression/Expression.hpp"
 #include <memory>
 #include <time.h>
-#include "engine/Plus.hpp"
+#include "engine/Config.hpp"
+
 using namespace std;
 
 int main()
 {
-    srand(time(NULL));
-    for (int i = 0; i < 50; i++)
+    try
     {
-        std::shared_ptr<SymbolicRegression::Expression> random_exp =
-            SymbolicRegression::Expression::GenerateRandomExpression();
-        cout << random_exp->ToString() << endl;
+        SymbolicRegression::Config config("default.config");
     }
+    catch (std::exception e)
+    {
+        std::cout << e.what() << std::endl;
+    }
+
+    // srand(time(NULL));
+    // for (int i = 0; i < 50; i++)
+    // {
+    //     std::shared_ptr<SymbolicRegression::Expression> random_exp =
+    //         SymbolicRegression::Expression::GenerateRandomExpression();
+    //     cout << random_exp->ToString() << endl;
+    // }
 }
