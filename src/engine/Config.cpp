@@ -61,7 +61,7 @@ void Config::ParseConfigLine(std::string configLine)
     if (fields.size() != 2)
         BadConfigFile("Wrong format \"" + configLine + "\"");
     if (IsValidKey(fields[0]))
-        m_configs.insert(pair<string, string>(fields[0], fields[1]));
+        m_configs[fields[0]] = fields[1];
     else
         BadConfigFile("Invalid Key \"" + fields[0] + "\"");
 }
