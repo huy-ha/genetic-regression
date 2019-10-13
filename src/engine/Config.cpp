@@ -13,13 +13,11 @@ shared_ptr<vector<tuple<float, float>>> Config::Data(new vector<tuple<float, flo
 
 Config::Config(string configFilePath)
 {
-    m_configs.insert(pair<string, string>("Input", "data.txt"));
-    m_configs.insert(pair<string, string>("PopulationCount", "100"));
-    m_configs.insert(pair<string, string>("GenerationCount", "50000"));
-    if (Instance == nullptr)
-    {
-        Instance = this;
-    }
+    m_configs.insert(make_pair("Input", "data.txt"));
+    m_configs.insert(make_pair("PopulationCount", "100"));
+    m_configs.insert(make_pair("GenerationCount", "50000"));
+    m_configs.insert(make_pair("ElitesCount", "1"));
+    Instance = this;
     string buf;
     ifstream configFile;
     configFile.open("configs/" + configFilePath);
@@ -29,7 +27,6 @@ Config::Config(string configFilePath)
         ParseConfigLine(buf);
     configFile.close();
     ParseInputDatapoints(m_configs["Input"]);
-    cout << string(*this) << endl;
 }
 
 void Config::ParseInputDatapoints(string inputFilePath)
@@ -46,6 +43,31 @@ void Config::ParseInputDatapoints(string inputFilePath)
     {
         Data->push_back(tuple<float, float>(stof(lines[2 * i]), stof(lines[2 * i + 1])));
     }
+}
+
+int Config::GetInt(std::string key)
+{
+    if (IsValidKey(key))
+    {
+        return stoi(m_configs.at(key));
+    }
+    throw std::exception(("Invalid Key" + key).c_str());
+}
+float Config::GetFloat(std::string key)
+{
+    if (IsValidKey(key))
+    {
+        return stof(m_configs.at(key));
+    }
+    throw std::exception(("Invalid Key" + key).c_str());
+}
+std::string Config::GetString(std::string key)
+{
+    if (IsValidKey(key))
+    {
+        return m_configs.at(key);
+    }
+    throw std::exception(("Invalid Key" + key).c_str());
 }
 
 Config::operator string() const
@@ -71,7 +93,7 @@ void Config::ParseConfigLine(string configLine)
         BadConfigFile("Invalid Key \"" + fields[0] + "\"");
 }
 
-bool Config::IsValidKey(string key) const
+bool Config::IsValidKey(string key)
 {
     return m_configs.find(key) != m_configs.end();
 }

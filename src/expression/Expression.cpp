@@ -22,6 +22,15 @@ Expression::Expression()
 
 float Expression::Fitness()
 {
+    if (m_fitness == -1)
+    {
+        m_fitness = CalculateFitness();
+    }
+    return m_fitness;
+}
+
+float Expression::CalculateFitness() const
+{
     using namespace std;
     std::function<float(float)> f = ToFunction();
     float AbsoluteErrorSum = 0;
@@ -29,7 +38,8 @@ float Expression::Fitness()
         AbsoluteErrorSum += f(std::get<0>(datapoint)) - std::get<1>(datapoint);
     });
     float AbsoluteMeanError = AbsoluteErrorSum / Config::Data->size();
-    return -AbsoluteMeanError;
+
+    return 100 / (AbsoluteMeanError + 1);
 }
 
 std::shared_ptr<Expression> Expression::GenerateRandomExpression()
@@ -67,7 +77,7 @@ std::shared_ptr<Expression> Expression::GenerateRandomExpression()
     }
 }
 
-std::function<float(float)> Expression::ToFunction()
+std::function<float(float)> Expression::ToFunction() const
 {
     return m_func;
 }
@@ -80,6 +90,13 @@ float Expression::Evaluate(float x)
 float Expression::operator()(float x)
 {
     return Evaluate(x);
+}
+
+bool Expression::operator<(const Expression &e)
+{
+    if (m_fitness == -1 || e.m_fitness == -1)
+        throw std::exception("Uncalculated fitness!");
+    return m_fitness > e.m_fitness;
 }
 
 void Expression::AddSubexpression(std::shared_ptr<Expression> subexpression)

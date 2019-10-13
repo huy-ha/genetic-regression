@@ -7,27 +7,28 @@
 #include <memory>
 namespace SymbolicRegression
 {
+using namespace std;
 class Config
 {
 public:
-    Config(std::string configFilePath);
+    Config(string configFilePath);
     static Config *Instance; // Singleton
-    static std::shared_ptr<std::vector<std::tuple<float, float>>> Data;
+    static shared_ptr<vector<tuple<float, float>>> Data;
 
 public:
-    int GetInt(std::string key) const;
-    float GetFloat(std::string key) const;
-    std::string GetString(std::string key) const;
-    operator std::string() const;
+    int GetInt(string key);
+    float GetFloat(string key);
+    string GetString(string key);
+    operator string() const;
 
 private:
-    void BadConfigFile(std::string message);
-    void ParseConfigLine(std::string configLine);
-    bool IsValidKey(std::string key) const;
-    void ParseInputDatapoints(std::string inputFilePath);
+    void BadConfigFile(string message);
+    void ParseConfigLine(string configLine);
+    bool IsValidKey(string key);
+    void ParseInputDatapoints(string inputFilePath);
 
-private:
-    std::map<std::string, std::string> m_configs;
+protected:
+    map<string, string> m_configs;
 };
 } // namespace SymbolicRegression
 #endif

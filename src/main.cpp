@@ -1,31 +1,24 @@
 #include <iostream>
-#include <math.h>
-#include "expression/Expression.hpp"
-#include <memory>
 #include <time.h>
 #include "engine/Config.hpp"
-
-#include "expression/Cos.hpp"
+#include <algorithm>
+#include "genetic-programming/Solver.hpp"
 using namespace std;
-
+using namespace SymbolicRegression;
 int main()
 {
     try
     {
-        SymbolicRegression::Config config("default.config");
+        Config config("default.config");
     }
-    catch (std::exception e)
+    catch (exception e)
     {
-        std::cout << e.what() << std::endl;
+        cout << e.what() << endl;
         return -1;
     }
-    cout << "data size in main()" << SymbolicRegression::Config::Data->size() << endl;
     // srand(time(NULL));
+    cout << "done setting up config" << endl;
     srand(0);
-    for (int i = 0; i < 50; i++)
-    {
-        std::shared_ptr<SymbolicRegression::Expression> random_exp =
-            SymbolicRegression::Expression::GenerateRandomExpression();
-        cout << random_exp->ToString() << ":" << random_exp->Fitness() << endl;
-    }
+    Solver solver = Solver();
+    solver.Evolve();
 }

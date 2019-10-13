@@ -14,15 +14,17 @@ public:
     std::shared_ptr<Expression> static GenerateRandomExpression();
 
     // Function Object functionality
-    virtual std::function<float(float)> ToFunction();
+    virtual std::function<float(float)> ToFunction() const;
     float Evaluate(float x);
     float operator()(float x);
+    bool operator<(const Expression &e);
 
     // Expression Tree
     void AddSubexpression(std::shared_ptr<Expression> subexpression);
 
     // Genetic Programming functionality
     float Fitness();
+    float CalculateFitness() const;
 
     // Tools
     static float RandomF();
@@ -38,6 +40,7 @@ protected:
     int m_order = -1;                       // How many parameters the current expression needs
     std::function<float(float)> m_func = 0; //function presenting this expression node's function
     std::vector<std::shared_ptr<Expression>> m_subexpressions;
+    float m_fitness = -1;
     enum ExpressionType
     {
         Sin,
@@ -49,8 +52,6 @@ protected:
         Constant,
         Variable
     };
-
-private:
 };
 } // namespace SymbolicRegression
 // std::ostream &operator<<(std::ostream &os, const Expression &e)

@@ -9,6 +9,7 @@ project( genetic_regression )
 file(GLOB symreg_SRC
     "src/engine/*.cpp"
     "src/expression/*.cpp"
+    "src/genetic-programming/*.cpp"
     "src/*.cpp"
 )
 # include
@@ -22,4 +23,5 @@ add_executable( gp_regression ${symreg_SRC})
 #external libs
 # add_subdirectory( ./libs/Logger ) only for static 
 #target
-
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
