@@ -52,12 +52,19 @@ float Expression::CalculateFitness() const
     return 100 / (AbsoluteMeanError + 1);
 }
 
-shared_ptr<Expression> Expression::GenerateRandomExpression()
+shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant = false)
 {
     // prioritize constants
     if (RandomF() > 0.3f)
     {
-        return RandomF() > 0.5f ? shared_ptr<Expression>(new SymbolicRegression::Constant()) : shared_ptr<Expression>(new SymbolicRegression::Variable());
+        if (RandomF() > 0.5f || noConstant)
+        {
+            return shared_ptr<Expression>(new SymbolicRegression::Variable());
+        }
+        else
+        {
+            return shared_ptr<Expression>(new SymbolicRegression::Constant());
+        }
     }
     // consider operators
 

@@ -12,7 +12,7 @@ class Expression
 {
 public:
     // Main API for other classes to use
-    shared_ptr<Expression> static GenerateRandomExpression();
+    shared_ptr<Expression> static GenerateRandomExpression(bool noConstant = false);
     static function<bool(const shared_ptr<Expression> &, const shared_ptr<Expression> &)> FitnessComparer;
     // Function Object functionality
     virtual function<float(float)> ToFunction() const;
