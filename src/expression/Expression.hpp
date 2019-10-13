@@ -10,18 +10,24 @@ namespace SymbolicRegression
 class Expression
 {
 public:
+    // Main API for other classes to use
     std::shared_ptr<Expression> static GenerateRandomExpression();
 
+    // Function Object functionality
     virtual std::function<float(float)> ToFunction();
-
     float Evaluate(float x);
     float operator()(float x);
 
+    // Expression Tree
     void AddSubexpression(std::shared_ptr<Expression> subexpression);
-    virtual std::string ToString() const = 0;
 
+    // Genetic Programming functionality
+    float Fitness();
+
+    // Tools
     static float RandomF();
     static float RandomF(float min, float max);
+    virtual std::string ToString() const = 0;
 
 protected:
     Expression();

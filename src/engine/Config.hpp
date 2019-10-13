@@ -12,7 +12,7 @@ class Config
 public:
     Config(std::string configFilePath);
     static Config *Instance; // Singleton
-    std::vector<std::tuple<float, float>> Data;
+    static std::shared_ptr<std::vector<std::tuple<float, float>>> Data;
 
 public:
     int GetInt(std::string key) const;

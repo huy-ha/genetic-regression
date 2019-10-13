@@ -10,6 +10,9 @@ public:
     inline Cos() : Expression()
     {
         m_subexpressions.push_back(Expression::GenerateRandomExpression());
+        m_func = [&](float x) {
+            return cosf(m_subexpressions[0]->ToFunction()(x));
+        };
     }
     inline virtual std::string ToString() const override
     {

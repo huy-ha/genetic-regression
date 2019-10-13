@@ -8,6 +8,9 @@
 #include "Multiply.hpp"
 #include "Divide.hpp"
 #include "Variable.hpp"
+#include "../engine/Config.hpp"
+#include <functional>
+#include <algorithm>
 
 namespace SymbolicRegression
 {
@@ -15,6 +18,18 @@ Expression::Expression()
 {
     m_func = 0;
     m_order = -1;
+}
+
+float Expression::Fitness()
+{
+    using namespace std;
+    std::function<float(float)> f = ToFunction();
+    float AbsoluteErrorSum = 0;
+    std::for_each(Config::Data->begin(), Config::Data->end(), [&](std::tuple<float, float> datapoint) {
+        AbsoluteErrorSum += f(std::get<0>(datapoint)) - std::get<1>(datapoint);
+    });
+    float AbsoluteMeanError = AbsoluteErrorSum / Config::Data->size();
+    return -AbsoluteMeanError;
 }
 
 std::shared_ptr<Expression> Expression::GenerateRandomExpression()

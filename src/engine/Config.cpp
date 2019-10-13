@@ -6,13 +6,20 @@
 #include <iterator>
 namespace SymbolicRegression
 {
-Config::Config(std::string configFilePath)
+using namespace std;
+
+Config *Config::Instance = nullptr;
+shared_ptr<vector<tuple<float, float>>> Config::Data(new vector<tuple<float, float>>());
+
+Config::Config(string configFilePath)
 {
-    using namespace std;
     m_configs.insert(pair<string, string>("Input", "data.txt"));
     m_configs.insert(pair<string, string>("PopulationCount", "100"));
     m_configs.insert(pair<string, string>("GenerationCount", "50000"));
-    // Instance = this;
+    if (Instance == nullptr)
+    {
+        Instance = this;
+    }
     string buf;
     ifstream configFile;
     configFile.open("configs/" + configFilePath);
@@ -21,13 +28,12 @@ Config::Config(std::string configFilePath)
     while (getline(configFile, buf))
         ParseConfigLine(buf);
     configFile.close();
-    cout << string(*this) << endl;
     ParseInputDatapoints(m_configs["Input"]);
+    cout << string(*this) << endl;
 }
 
-void Config::ParseInputDatapoints(std::string inputFilePath)
+void Config::ParseInputDatapoints(string inputFilePath)
 {
-    using namespace std;
     ifstream inputFile;
     inputFile.open("inputs/" + inputFilePath);
     if (!inputFile.is_open())
@@ -38,13 +44,12 @@ void Config::ParseInputDatapoints(std::string inputFilePath)
         BadConfigFile("Input Data in wrong format");
     for (int i = 0; i < lines.size() / 2; i++)
     {
-        Data.push_back(tuple<float, float>(stof(lines[2 * i]), stof(lines[2 * i + 1])));
+        Data->push_back(tuple<float, float>(stof(lines[2 * i]), stof(lines[2 * i + 1])));
     }
 }
 
-Config::operator std::string() const
+Config::operator string() const
 {
-    using namespace std;
     string output = "";
     for (map<string, string>::const_iterator it = m_configs.begin(); it != m_configs.end(); ++it)
     {
@@ -52,9 +57,9 @@ Config::operator std::string() const
     }
     return output;
 }
-void Config::ParseConfigLine(std::string configLine)
+void Config::ParseConfigLine(string configLine)
 {
-    using namespace std;
+
     vector<string> fields{
         istream_iterator<string>(stringstream(configLine)),
         istream_iterator<string>()};
@@ -66,13 +71,13 @@ void Config::ParseConfigLine(std::string configLine)
         BadConfigFile("Invalid Key \"" + fields[0] + "\"");
 }
 
-bool Config::IsValidKey(std::string key) const
+bool Config::IsValidKey(string key) const
 {
     return m_configs.find(key) != m_configs.end();
 }
 
-void Config::BadConfigFile(std::string message)
+void Config::BadConfigFile(string message)
 {
-    throw std::exception(("Bad Config File: " + message).c_str());
+    throw exception(("Bad Config File: " + message).c_str());
 }
 } // namespace SymbolicRegression
