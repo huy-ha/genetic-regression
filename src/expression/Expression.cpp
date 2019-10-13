@@ -11,9 +11,19 @@
 #include "../engine/Config.hpp"
 #include <functional>
 #include <algorithm>
+#include "../engine/OutputLogger.hpp"
 
 namespace SymbolicRegression
 {
+using namespace std;
+function<bool(
+    const shared_ptr<Expression> &,
+    const shared_ptr<Expression> &)>
+    Expression::FitnessComparer = [](const shared_ptr<Expression> &a,
+                                     const shared_ptr<Expression> &b) -> bool {
+    return a->Fitness() > b->Fitness();
+};
+
 Expression::Expression()
 {
     m_func = 0;
@@ -32,22 +42,22 @@ float Expression::Fitness()
 float Expression::CalculateFitness() const
 {
     using namespace std;
-    std::function<float(float)> f = ToFunction();
+    function<float(float)> f = ToFunction();
     float AbsoluteErrorSum = 0;
-    std::for_each(Config::Data->begin(), Config::Data->end(), [&](std::tuple<float, float> datapoint) {
-        AbsoluteErrorSum += f(std::get<0>(datapoint)) - std::get<1>(datapoint);
+    for_each(Config::Data->begin(), Config::Data->end(), [&](tuple<float, float> datapoint) {
+        AbsoluteErrorSum += abs(f(get<0>(datapoint)) - get<1>(datapoint));
     });
     float AbsoluteMeanError = AbsoluteErrorSum / Config::Data->size();
-
+    OutputLogger::Evaluations = OutputLogger::Evaluations + 1;
     return 100 / (AbsoluteMeanError + 1);
 }
 
-std::shared_ptr<Expression> Expression::GenerateRandomExpression()
+shared_ptr<Expression> Expression::GenerateRandomExpression()
 {
     // prioritize constants
     if (RandomF() > 0.3f)
     {
-        return RandomF() > 0.5f ? std::shared_ptr<Expression>(new SymbolicRegression::Constant()) : std::shared_ptr<Expression>(new SymbolicRegression::Variable());
+        return RandomF() > 0.5f ? shared_ptr<Expression>(new SymbolicRegression::Constant()) : shared_ptr<Expression>(new SymbolicRegression::Variable());
     }
     // consider operators
 
@@ -55,29 +65,29 @@ std::shared_ptr<Expression> Expression::GenerateRandomExpression()
     if (RandomF() > 0.8f)
     {
         // equal probability of cos and sin
-        return RandomF() > 0.5f ? std::shared_ptr<Expression>(new SymbolicRegression::Cos()) : std::shared_ptr<Expression>(new SymbolicRegression::Sin());
+        return RandomF() > 0.5f ? shared_ptr<Expression>(new SymbolicRegression::Cos()) : shared_ptr<Expression>(new SymbolicRegression::Sin());
     }
     float p = RandomF();
     //equal probabilty of binary opertaors
     if (p > (3.0f / 4.0f))
     {
-        return std::shared_ptr<Expression>(new SymbolicRegression::Plus());
+        return shared_ptr<Expression>(new SymbolicRegression::Plus());
     }
     else if (p > (2.0f / 4.0f))
     {
-        return std::shared_ptr<Expression>(new SymbolicRegression::Minus());
+        return shared_ptr<Expression>(new SymbolicRegression::Minus());
     }
     else if (p > (1.0f / 4.0f))
     {
-        return std::shared_ptr<Expression>(new SymbolicRegression::Multiply());
+        return shared_ptr<Expression>(new SymbolicRegression::Multiply());
     }
     else
     {
-        return std::shared_ptr<Expression>(new SymbolicRegression::Divide());
+        return shared_ptr<Expression>(new SymbolicRegression::Divide());
     }
 }
 
-std::function<float(float)> Expression::ToFunction() const
+function<float(float)> Expression::ToFunction() const
 {
     return m_func;
 }
@@ -95,11 +105,11 @@ float Expression::operator()(float x)
 bool Expression::operator<(const Expression &e)
 {
     if (m_fitness == -1 || e.m_fitness == -1)
-        throw std::exception("Uncalculated fitness!");
+        throw exception("Uncalculated fitness!");
     return m_fitness > e.m_fitness;
 }
 
-void Expression::AddSubexpression(std::shared_ptr<Expression> subexpression)
+void Expression::AddSubexpression(shared_ptr<Expression> subexpression)
 {
     m_subexpressions.push_back(subexpression);
 }

@@ -4,6 +4,7 @@
 #include "../engine/Config.hpp"
 #include <functional>
 #include <algorithm>
+#include <iterator>
 #include "../engine/OutputLogger.hpp"
 #include "RandomReproducer.hpp"
 namespace SymbolicRegression
@@ -11,21 +12,32 @@ namespace SymbolicRegression
 using namespace std;
 Solver::Solver()
 {
-    cout << "trying to get populationCount" << endl;
     m_populationCount = Config::Instance->GetInt("PopulationCount");
-    cout << "trying to get eliteCount" << endl;
     m_eliteCount = Config::Instance->GetInt("ElitesCount");
     m_reproducer = shared_ptr<Reproducer>(new RandomReproducer(m_populationCount));
 }
 
+void Solver::PrintPopulation()
+{
+    for_each(m_population.begin(), m_population.end(), [](auto exp) {
+        cout << exp->ToString() << " | ";
+    });
+    cout << endl;
+}
 void Solver::InitializePopulation()
 {
-    for (int i = 0; i < m_populationCount; ++i)
+    while (m_population.size() < m_populationCount)
     {
-        m_population.emplace_front(Expression::GenerateRandomExpression());
+        auto newExp = Expression::GenerateRandomExpression();
+        if (!any_of(m_population.begin(), m_population.end(), [&](const shared_ptr<Expression> &exp) {
+                return exp->ToString() == newExp->ToString();
+            }))
+        {
+            m_population.emplace_front(newExp);
+        }
     }
-    cout << "Generated population of " << m_population.size() << " expressions";
 }
+
 void Solver::Evolve()
 {
     int generationCount = Config::Instance->GetInt("GenerationCount");
@@ -44,13 +56,12 @@ void Solver::Evolve()
         {
             prevHighestFitness = bestExpression->Fitness();
             cout << bestExpression->ToString() << " : " << prevHighestFitness
-                 << " after" << OutputLogger::Evaluations << " evaluations" << endl;
+                 << " after " << OutputLogger::Evaluations << " evaluations" << endl;
         }
         // Selection
         auto it = m_population.begin();
         advance(it, m_population.size() * 0.5f);
         m_population.erase(it, m_population.end());
-        cout << "population size is now " << m_population.size() << endl;
 
         // Reproduce
         auto offspring = m_reproducer->Reproduce(m_population);
@@ -59,12 +70,11 @@ void Solver::Evolve()
         auto eliteEnd = m_population.begin();
         advance(eliteEnd, m_eliteCount);
         list<shared_ptr<Expression>> elites(m_population.begin(), eliteEnd);
-
         // Create new population
         m_population.clear();
-        m_population.merge(elites);
-        m_population.merge(*offspring);
-        m_population.sort();
+        copy(elites.begin(), elites.end(), front_inserter(m_population));
+        copy(offspring->begin(), offspring->end(), front_inserter(m_population));
+        m_population.sort(Expression::FitnessComparer);
         m_population.unique();
 
         // Ensure size of population
@@ -76,7 +86,6 @@ void Solver::Evolve()
         {
             m_population.resize(m_populationCount);
         }
-        cout << "Done generation " << i << endl;
     }
 }
 
