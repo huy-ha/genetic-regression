@@ -9,6 +9,10 @@ namespace SymbolicRegression
 Config::Config(std::string configFilePath)
 {
     using namespace std;
+    m_configs.insert(pair<string, string>("Input", "data.txt"));
+    m_configs.insert(pair<string, string>("PopulationCount", "100"));
+    m_configs.insert(pair<string, string>("GenerationCount", "50000"));
+    // Instance = this;
     string buf;
     ifstream configFile;
     configFile.open("configs/" + configFilePath);
@@ -18,6 +22,24 @@ Config::Config(std::string configFilePath)
         ParseConfigLine(buf);
     configFile.close();
     cout << string(*this) << endl;
+    ParseInputDatapoints(m_configs["Input"]);
+}
+
+void Config::ParseInputDatapoints(std::string inputFilePath)
+{
+    using namespace std;
+    ifstream inputFile;
+    inputFile.open("inputs/" + inputFilePath);
+    if (!inputFile.is_open())
+        BadConfigFile("Can't open file");
+    vector<string> lines;
+    copy(istream_iterator<string>(inputFile), istream_iterator<string>(), back_inserter(lines));
+    if (lines.size() % 2 != 0)
+        BadConfigFile("Input Data in wrong format");
+    for (int i = 0; i < lines.size() / 2; i++)
+    {
+        Data.push_back(tuple<float, float>(stof(lines[2 * i]), stof(lines[2 * i + 1])));
+    }
 }
 
 Config::operator std::string() const
@@ -46,7 +68,7 @@ void Config::ParseConfigLine(std::string configLine)
 
 bool Config::IsValidKey(std::string key) const
 {
-    return std::find(m_configKeys.begin(), m_configKeys.end(), key) != m_configKeys.end();
+    return m_configs.find(key) != m_configs.end();
 }
 
 void Config::BadConfigFile(std::string message)
