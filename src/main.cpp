@@ -19,8 +19,9 @@ int main()
         auto start = high_resolution_clock::now();
         solver.Evolve();
         auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<seconds>(stop - start);
-        cout << duration.count() << endl;
+        auto ms = duration_cast<milliseconds>(stop - start);
+        float seconds = ms.count() / 1000.0f;
+        cout << seconds << endl;
     }
     catch (exception e)
     {

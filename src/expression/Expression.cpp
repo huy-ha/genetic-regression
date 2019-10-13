@@ -52,7 +52,7 @@ float Expression::CalculateFitness() const
     return 100 / (AbsoluteMeanError + 1);
 }
 
-shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant = false)
+shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant)
 {
     // prioritize constants
     if (RandomF() > 0.3f)
