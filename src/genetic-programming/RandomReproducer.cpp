@@ -1,21 +1,44 @@
 #include "RandomReproducer.hpp"
 #include <algorithm>
+#include <future>
+#include <mutex>
+#include <deque>
+#include <chrono>
 namespace SymbolicRegression
 {
 using namespace std;
+mutex mu;
+void RandomReproducer::TryInsertOffspring(shared_ptr<Expression> exp)
+{
+    lock_guard<mutex> lock(mu);
+    if (offsprings.size() < m_populationCount &&
+        (offsprings.find(exp->ToString()) == offsprings.end()))
+        offsprings.insert(make_pair(exp->ToString(), exp));
+}
+
 shared_ptr<list<shared_ptr<Expression>>> RandomReproducer::Reproduce(const list<shared_ptr<Expression>> &parents)
 {
-    shared_ptr<list<shared_ptr<Expression>>> offsprings(new list<shared_ptr<Expression>>());
-    while (offsprings->size() < m_populationCount)
+    offsprings.clear();
+    deque<future<void>> tasks;
+    while (offsprings.size() < m_populationCount)
     {
-        auto offspring = Expression::GenerateRandomExpression(true);
-        if (!any_of(offsprings->begin(), offsprings->end(), [&](const shared_ptr<Expression> &exp) {
-                return exp->ToString() == offspring->ToString();
-            }))
-        {
-            offsprings->emplace_front(offspring);
-        }
+        // if (tasks.size() > 100)
+        // {
+        //     remove_if(tasks.begin(), tasks.end(), [](auto task) {
+        //         return task.wait_for(chrono::seconds(0)) == future_status::ready;
+        //     });
+        // }
+        // else
+        // {
+        tasks.push_back(async([&]() {
+            TryInsertOffspring(Expression::GenerateRandomExpression(true));
+        }));
+        // }
     }
-    return offsprings;
+    shared_ptr<list<shared_ptr<Expression>>> output(new list<shared_ptr<Expression>>(offsprings.size()));
+    transform(offsprings.begin(), offsprings.end(), output->begin(), [](auto p) {
+        return p.second;
+    });
+    return output;
 }
 } // namespace SymbolicRegression
