@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <mutex>
 namespace SymbolicRegression
 {
 using namespace std;
@@ -53,6 +54,9 @@ protected:
         Constant,
         Variable
     };
+
+private:
+    static mutex randMutex;
 };
 } // namespace SymbolicRegression
 // ostream &operator<<(ostream &os, const Expression &e)

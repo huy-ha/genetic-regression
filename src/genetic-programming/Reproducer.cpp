@@ -2,6 +2,7 @@
 #include <mutex>
 #include <future>
 #include <deque>
+#include <algorithm>
 namespace SymbolicRegression
 {
 using namespace std;
@@ -29,8 +30,10 @@ shared_ptr<list<shared_ptr<Expression>>> Reproducer::Reproduce(const list<shared
     int parentCount = int(parents.size());
     while (!m_stop)
     {
+        size_t n = max(m_populationCount - (int)m_offsprings.size(), 20);
+        cout << "trying to create " << n << " offsprings" << endl;
         vector<future<void>> tasks;
-        tasks.reserve(size_t(m_populationCount) - m_offsprings.size());
+        tasks.reserve(n);
         while (tasks.size() < tasks.capacity())
         {
             // find two random parents
@@ -46,11 +49,13 @@ shared_ptr<list<shared_ptr<Expression>>> Reproducer::Reproduce(const list<shared
         for_each(tasks.begin(), tasks.end(), [](const future<void> &task) {
             task.wait();
         });
+        cout << "done creating" << endl;
     }
     shared_ptr<list<shared_ptr<Expression>>> output(new list<shared_ptr<Expression>>(m_offsprings.size()));
     transform(m_offsprings.begin(), m_offsprings.end(), output->begin(), [](auto p) {
         return p.second;
     });
+
     return output;
 }
 } // namespace SymbolicRegression

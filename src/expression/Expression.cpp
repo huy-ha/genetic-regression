@@ -24,6 +24,8 @@ function<bool(
     return a->Fitness() > b->Fitness();
 };
 
+mutex Expression::randMutex;
+
 Expression::Expression()
 {
     m_func = 0;
@@ -128,6 +130,7 @@ float Expression::RandomF()
 
 float Expression::RandomF(float min, float max)
 {
+    lock_guard<mutex> lock(randMutex);
     return (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * (max - min) + min;
 }
 

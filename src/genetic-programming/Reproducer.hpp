@@ -17,7 +17,7 @@ protected:
     int m_populationCount = -1;
     map<string, shared_ptr<Expression>> m_offsprings;
     void TryInsertOffspring(shared_ptr<Expression> exp);
-    virtual shared_ptr<Expression> CreateOffspring(shared_ptr<Expression> p1, shared_ptr<Expression> p2) = 0;
+    virtual shared_ptr<Expression> CreateOffspring(const shared_ptr<Expression> p1, const shared_ptr<Expression> p2) = 0;
 
 private:
     bool m_stop;
