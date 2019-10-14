@@ -50,7 +50,7 @@ float Expression::CalculateFitness() const
         AbsoluteErrorSum += abs(f(get<0>(datapoint)) - get<1>(datapoint));
     });
     float AbsoluteMeanError = AbsoluteErrorSum / Config::Data->size();
-    OutputLogger::Evaluations = OutputLogger::Evaluations + 1;
+    OutputLogger::IncrementEvaluations();
     return 100 / (AbsoluteMeanError + 1);
 }
 

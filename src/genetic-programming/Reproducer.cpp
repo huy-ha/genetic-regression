@@ -31,7 +31,6 @@ shared_ptr<list<shared_ptr<Expression>>> Reproducer::Reproduce(const list<shared
     while (!m_stop)
     {
         size_t n = max(m_populationCount - (int)m_offsprings.size(), 20);
-        cout << "trying to create " << n << " offsprings" << endl;
         vector<future<void>> tasks;
         tasks.reserve(n);
         while (tasks.size() < tasks.capacity())
@@ -49,7 +48,6 @@ shared_ptr<list<shared_ptr<Expression>>> Reproducer::Reproduce(const list<shared
         for_each(tasks.begin(), tasks.end(), [](const future<void> &task) {
             task.wait();
         });
-        cout << "done creating" << endl;
     }
     shared_ptr<list<shared_ptr<Expression>>> output(new list<shared_ptr<Expression>>(m_offsprings.size()));
     transform(m_offsprings.begin(), m_offsprings.end(), output->begin(), [](auto p) {

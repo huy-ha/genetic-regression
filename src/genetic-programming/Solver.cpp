@@ -70,7 +70,7 @@ void Solver::Evolve()
     {
         m_prevHighestFitness = bestExpression->Fitness();
         cout << bestExpression->ToString() << " : " << m_prevHighestFitness
-             << " after " << OutputLogger::Evaluations << " evaluations" << endl;
+             << " after " << OutputLogger::GetEvaluations() << " evaluations" << endl;
     }
     // Selection
     auto it = m_population.begin();
@@ -101,7 +101,7 @@ void Solver::Evolve()
         m_population.resize(m_populationCount);
     }
     // Collect Stats
-    OutputLogger::Log("HighestFitness", to_string(OutputLogger::Evaluations) + " " + to_string(m_prevHighestFitness));
+    OutputLogger::Log("HighestFitness", to_string(OutputLogger::GetEvaluations()) + " " + to_string(m_prevHighestFitness));
 }
 
 void Solver::SaveOutput()
