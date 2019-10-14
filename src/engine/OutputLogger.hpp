@@ -2,17 +2,22 @@
 #define _OUTPUT_LOGGER_HPP_
 #include <map>
 #include <string>
+#include <memory>
 namespace SymbolicRegression
 {
+using namespace std;
 class OutputLogger
 {
 public:
-    static OutputLogger *Instance; // Singleton
-    static int Evaluations;
     OutputLogger();
+    static void Log(string key, string log);
+    static string Get(string key);
+    static shared_ptr<OutputLogger> Instance(); // Singleton
+    static int Evaluations;
 
 private:
-    std::map<std::string, std::string> m_log;
+    map<string, string> m_log;
+    static shared_ptr<OutputLogger> m_instance;
 };
 } // namespace SymbolicRegression
 #endif

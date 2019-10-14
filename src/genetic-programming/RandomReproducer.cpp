@@ -22,23 +22,14 @@ shared_ptr<list<shared_ptr<Expression>>> RandomReproducer::Reproduce(const list<
     deque<future<void>> tasks;
     while (offsprings.size() < m_populationCount)
     {
-        // if (tasks.size() > 100)
-        // {
-        //     remove_if(tasks.begin(), tasks.end(), [](auto task) {
-        //         return task.wait_for(chrono::seconds(0)) == future_status::ready;
-        //     });
-        // }
-        // else
-        // {
         tasks.push_back(async([&]() {
             TryInsertOffspring(Expression::GenerateRandomExpression(true));
         }));
-        // }
     }
     shared_ptr<list<shared_ptr<Expression>>> output(new list<shared_ptr<Expression>>(offsprings.size()));
     transform(offsprings.begin(), offsprings.end(), output->begin(), [](auto p) {
         return p.second;
     });
     return output;
-}
+} // namespace SymbolicRegression
 } // namespace SymbolicRegression

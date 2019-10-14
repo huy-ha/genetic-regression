@@ -11,7 +11,7 @@ using namespace std;
 class Config
 {
 public:
-    Config(string configFilePath);
+    Config(string configFilePath, string outputFilePath);
     static Config *Instance; // Singleton
     static shared_ptr<vector<tuple<float, float>>> Data;
 

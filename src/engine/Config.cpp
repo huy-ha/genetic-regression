@@ -11,12 +11,13 @@ using namespace std;
 Config *Config::Instance = nullptr;
 shared_ptr<vector<tuple<float, float>>> Config::Data(new vector<tuple<float, float>>());
 
-Config::Config(string configFilePath)
+Config::Config(string configFilePath, string outputFilePath)
 {
     m_configs.insert(make_pair("Input", "data.txt"));
     m_configs.insert(make_pair("PopulationCount", "100"));
     m_configs.insert(make_pair("GenerationCount", "50000"));
     m_configs.insert(make_pair("ElitesCount", "1"));
+    m_configs.insert(make_pair("OutputPath", "runs/" + outputFilePath + "/"));
     Instance = this;
     string buf;
     ifstream configFile;

@@ -1,2 +1,2 @@
 #!/usr/bin/bash.exe
-build/Release/gp_regression.exe
+build/Release/gp_regression.exe $1
