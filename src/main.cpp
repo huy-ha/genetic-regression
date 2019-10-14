@@ -10,6 +10,23 @@ using namespace std::chrono;
 using namespace SymbolicRegression;
 int main(int argc, char **argv)
 {
+    srand(time(NULL));
+    // srand(24);
+    auto exp1 = Expression::GenerateRandomExpression();
+    auto exp2 = Expression::Copy(exp1);
+    auto f1 = exp1->ToFunction();
+    auto f2 = exp2->ToFunction();
+    cout << "started with \t" << exp1->ToString() << endl;
+    cout << "f1(0) = " << f1(0) << endl;
+    cout << "f1(1) = " << f1(1) << endl;
+    cout << "f1(2) = " << f1(2) << endl;
+
+    cout << "ended with \t" << exp2->ToString() << endl;
+    cout << "f2(0) = " << f2(0) << endl;
+    cout << "f2(1) = " << f2(1) << endl;
+    cout << "f2(2) = " << f2(2) << endl;
+    return 0;
+
     string configFile = "default.config";
     string outputDir;
     if (argc < 2)
@@ -25,8 +42,6 @@ int main(int argc, char **argv)
     }
     try
     {
-        // srand(time(NULL));
-        srand(0);
         Config config(configFile, outputDir);
         cout << string(config) << endl;
         Solver solver = Solver();

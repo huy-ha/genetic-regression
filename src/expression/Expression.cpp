@@ -12,6 +12,7 @@
 #include <functional>
 #include <algorithm>
 #include "../engine/OutputLogger.hpp"
+#include <typeinfo>
 
 namespace SymbolicRegression
 {
@@ -30,6 +31,16 @@ Expression::Expression()
 {
     m_func = 0;
     m_order = -1;
+}
+
+Expression::Expression(const Expression &other)
+{
+    m_order = other.m_order;
+    m_func = 0;
+    for (int i = 0; i < other.m_subexpressions.size(); i++)
+    {
+        m_subexpressions.push_back(Copy(other.m_subexpressions[i]));
+    }
 }
 
 float Expression::Fitness()
@@ -62,11 +73,11 @@ shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant)
     {
         if (RandomF() > 0.5f || noConstant)
         {
-            return shared_ptr<Expression>(new SymbolicRegression::Variable());
+            return shared_ptr<Expression>(new Variable());
         }
         else
         {
-            return shared_ptr<Expression>(new SymbolicRegression::Constant());
+            return shared_ptr<Expression>(new Constant());
         }
     }
     // consider operators
@@ -75,26 +86,72 @@ shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant)
     if (RandomF() > 0.8f)
     {
         // equal probability of cos and sin
-        return RandomF() > 0.5f ? shared_ptr<Expression>(new SymbolicRegression::Cos()) : shared_ptr<Expression>(new SymbolicRegression::Sin());
+        return RandomF() > 0.5f ? shared_ptr<Expression>(new Cos()) : shared_ptr<Expression>(new Sin());
     }
     float p = RandomF();
     //equal probabilty of binary opertaors
     if (p > (3.0f / 4.0f))
     {
-        return shared_ptr<Expression>(new SymbolicRegression::Plus());
+        return shared_ptr<Expression>(new Plus());
     }
     else if (p > (2.0f / 4.0f))
     {
-        return shared_ptr<Expression>(new SymbolicRegression::Minus());
+        return shared_ptr<Expression>(new Minus());
     }
     else if (p > (1.0f / 4.0f))
     {
-        return shared_ptr<Expression>(new SymbolicRegression::Multiply());
+        return shared_ptr<Expression>(new Multiply());
     }
     else
     {
-        return shared_ptr<Expression>(new SymbolicRegression::Divide());
+        return shared_ptr<Expression>(new Divide());
     }
+}
+
+#define pointer_cast(T, U, p) shared_ptr<T>(new U(*dynamic_pointer_cast<U>(p)));
+
+shared_ptr<Expression> Expression::Copy(const shared_ptr<Expression> &source)
+{
+    shared_ptr<Expression> exp;
+    string typeName(typeid(*source).name());
+    string prefix("class SymbolicRegression::");
+    if (typeName == prefix + "Constant")
+    {
+        exp = pointer_cast(Expression, Constant, source); // shared_ptr<Expression>(new Constant(*dynamic_pointer_cast<Constant>(source)));
+    }
+    else if (typeName == prefix + "Variable")
+    {
+        exp = pointer_cast(Expression, Variable, source);
+    }
+    else if (typeName == prefix + "Plus")
+    {
+        exp = pointer_cast(Expression, Plus, source);
+    }
+    else if (typeName == prefix + "Minus")
+    {
+        exp = pointer_cast(Expression, Minus, source);
+    }
+    else if (typeName == prefix + "Multiply")
+    {
+        exp = pointer_cast(Expression, Multiply, source);
+    }
+    else if (typeName == prefix + "Divide")
+    {
+        exp = pointer_cast(Expression, Divide, source);
+    }
+    else if (typeName == prefix + "Cos")
+    {
+        exp = pointer_cast(Expression, Cos, source);
+    }
+    else if (typeName == prefix + "Sin")
+    {
+        exp = pointer_cast(Expression, Sin, source);
+    }
+    else
+    {
+        cout << "Error: Invalid type name " << typeName << endl;
+    }
+    return exp;
 }
 
 function<float(float)> Expression::ToFunction() const

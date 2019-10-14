@@ -8,5 +8,7 @@ Sin::Sin() : Expression()
     m_func = [&](float x) {
         return sinf(m_subexpressions[0]->ToFunction()(x));
     };
+    m_order = 1;
 }
-}
+
+} // namespace SymbolicRegression

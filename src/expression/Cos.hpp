@@ -13,7 +13,17 @@ public:
         m_func = [&](float x) {
             return cosf(m_subexpressions[0]->ToFunction()(x));
         };
+        m_order = 1;
     }
+
+    inline Cos(const Cos &other) : Expression(other)
+    {
+        m_func = [&](float x) {
+            return cosf(m_subexpressions[0]->ToFunction()(x));
+        };
+        m_order = 1;
+    }
+
     inline virtual std::string ToString() const override
     {
         return "cos(" + m_subexpressions[0]->ToString() + ")";

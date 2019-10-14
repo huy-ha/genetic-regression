@@ -12,6 +12,7 @@ Plus::Plus() : Expression()
     m_order = 2;
 }
 
+
 std::string Plus::ToString() const
 {
     std::string tmp = m_subexpressions[1]->ToString();

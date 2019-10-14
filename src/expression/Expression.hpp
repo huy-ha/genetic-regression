@@ -32,9 +32,11 @@ public:
     static float RandomF();
     static float RandomF(float min, float max);
     virtual string ToString() const = 0;
+    static shared_ptr<Expression> Copy(const shared_ptr<Expression> &source);
 
 protected:
     Expression();
+    Expression(const Expression &other);
     template <typename R, typename... Types>
     inline static int NumArgs(function<R(Types...)> f) { return sizeof...(Types); }
 
@@ -43,17 +45,6 @@ protected:
     function<float(float)> m_func = 0; //function presenting this expression node's function
     vector<shared_ptr<Expression>> m_subexpressions;
     float m_fitness = -1;
-    enum ExpressionType
-    {
-        Sin,
-        Cos,
-        Plus,
-        Minus,
-        Multiply,
-        Divide,
-        Constant,
-        Variable
-    };
 
 private:
     static mutex randMutex;

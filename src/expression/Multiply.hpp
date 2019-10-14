@@ -15,6 +15,15 @@ public:
         };
         m_order = 2;
     }
+
+    inline Multiply(const Multiply &other) : Expression(other)
+    {
+        m_func = [&](float x) {
+            return m_subexpressions[0]->ToFunction()(x) * m_subexpressions[1]->ToFunction()(x);
+        };
+        m_order = 2;
+    }
+
     inline virtual std::string ToString() const override
     {
         return m_subexpressions[0]->ToString() + " * " + m_subexpressions[1]->ToString();

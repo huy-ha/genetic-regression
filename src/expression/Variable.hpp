@@ -13,6 +13,15 @@ public:
         };
         m_order = 0;
     }
+
+    inline Variable(const Variable &other) : Expression(other)
+    {
+        m_func = [&](float x) {
+            return x;
+        };
+        m_order = 0;
+    }
+
     inline virtual std::string ToString() const override
     {
         return "x";
