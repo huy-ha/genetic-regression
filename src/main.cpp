@@ -23,12 +23,12 @@ int main(int argc, char **argv)
         // output dir and config supplied
         configFile = string(argv[2]);
     }
-
     try
     {
+        // srand(time(NULL));
+        srand(0);
         Config config(configFile, outputDir);
         cout << string(config) << endl;
-        srand(0);
         Solver solver = Solver();
         auto start = high_resolution_clock::now();
         solver.Run();

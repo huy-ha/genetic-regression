@@ -10,7 +10,8 @@ using namespace std;
 class Reproducer
 {
 public:
-    inline Reproducer(int populationCount) : m_populationCount(populationCount) {}
+    Reproducer(int populationCount);
+    shared_ptr<list<shared_ptr<Expression>>> AsyncReproduce(const list<shared_ptr<Expression>> &parents);
     shared_ptr<list<shared_ptr<Expression>>> Reproduce(const list<shared_ptr<Expression>> &parents);
 
 protected:
@@ -21,6 +22,8 @@ protected:
 
 private:
     bool m_stop;
+    int m_minThreads = -1;
+    int m_maxThreads = -1;
 };
 } // namespace SymbolicRegression
 

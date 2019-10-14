@@ -53,9 +53,10 @@ float Expression::CalculateFitness() const
     OutputLogger::IncrementEvaluations();
     return 100 / (AbsoluteMeanError + 1);
 }
-
+mutex randExpMu;
 shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant)
 {
+    // lock_guard<mutex> lock(randExpMu); => TODO check that this leads to deadlock
     // prioritize constants
     if (RandomF() > 0.3f)
     {

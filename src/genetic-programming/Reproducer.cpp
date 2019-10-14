@@ -3,10 +3,19 @@
 #include <future>
 #include <deque>
 #include <algorithm>
+#include "../engine/Config.hpp"
 namespace SymbolicRegression
 {
 using namespace std;
 mutex mu;
+
+Reproducer::Reproducer(int populationCount)
+{
+    m_populationCount = populationCount;
+    m_minThreads = Config::GetInt("MinThreads");
+    m_maxThreads = Config::GetInt("MaxThreads");
+}
+
 void Reproducer::TryInsertOffspring(shared_ptr<Expression> exp)
 {
     lock_guard<mutex> lock(mu);
@@ -23,20 +32,20 @@ void Reproducer::TryInsertOffspring(shared_ptr<Expression> exp)
     }
 }
 
-shared_ptr<list<shared_ptr<Expression>>> Reproducer::Reproduce(const list<shared_ptr<Expression>> &parents)
+shared_ptr<list<shared_ptr<Expression>>> Reproducer::AsyncReproduce(const list<shared_ptr<Expression>> &parents)
 {
     m_offsprings.clear();
     m_stop = false;
     int parentCount = int(parents.size());
     while (!m_stop)
     {
-        size_t n = max(m_populationCount - (int)m_offsprings.size(), 20);
+        size_t n = max(m_populationCount - (int)m_offsprings.size(), m_minThreads);
+        n = min(int(n), m_maxThreads);
         vector<future<void>> tasks;
         tasks.reserve(n);
         while (tasks.size() < tasks.capacity())
         {
-            // find two random parents
-            int idx1 = int(Expression::RandomF(0, float(parentCount)));
+            int idx1 = int(Expression::RandomF(0, float(parentCount) - 1));
             int idx2 = (idx1 + (int(Expression::RandomF(0, float(parentCount))))) % parentCount;
             auto p1 = parents.begin();
             advance(p1, idx1);
@@ -45,9 +54,36 @@ shared_ptr<list<shared_ptr<Expression>>> Reproducer::Reproduce(const list<shared
             // queue up asynchronous reproduce task
             tasks.push_back(async([&]() { TryInsertOffspring(CreateOffspring(*p1, *p2)); }));
         }
-        for_each(tasks.begin(), tasks.end(), [](const future<void> &task) {
-            task.wait();
+        for_each(tasks.begin(), tasks.end(), [](future<void> &task) {
+            task.get();
         });
+    }
+    shared_ptr<list<shared_ptr<Expression>>> output(new list<shared_ptr<Expression>>(m_offsprings.size()));
+    transform(m_offsprings.begin(), m_offsprings.end(), output->begin(), [](auto p) {
+        return p.second;
+    });
+
+    return output;
+}
+
+shared_ptr<list<shared_ptr<Expression>>> Reproducer::Reproduce(const list<shared_ptr<Expression>> &parents)
+{
+    m_offsprings.clear();
+    int parentCount = int(parents.size());
+    while (m_offsprings.size() < m_populationCount)
+    {
+        int idx1 = int(Expression::RandomF(0, float(parentCount) - 1));
+        int idx2 = (idx1 + (int(Expression::RandomF(0, float(parentCount))))) % parentCount;
+        auto p1 = parents.begin();
+        advance(p1, idx1);
+        auto p2 = parents.begin();
+        advance(p2, idx2);
+        // Create one offspring and add to m_offsprings if offspring isn't in population
+        auto offspring = CreateOffspring(*p1, *p2);
+        if (m_offsprings.find(offspring->ToString()) == m_offsprings.end())
+        {
+            m_offsprings.insert(make_pair(offspring->ToString(), offspring));
+        }
     }
     shared_ptr<list<shared_ptr<Expression>>> output(new list<shared_ptr<Expression>>(m_offsprings.size()));
     transform(m_offsprings.begin(), m_offsprings.end(), output->begin(), [](auto p) {
