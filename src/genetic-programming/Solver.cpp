@@ -18,10 +18,10 @@ Solver::Solver()
     m_populationCount = Config::GetInt("PopulationCount");
     m_eliteCount = Config::GetInt("ElitesCount");
     string reproducerConfig = Config::GetString("Reproducer");
-    if (reproducerConfig == "Random")
-    {
-        m_reproducer = shared_ptr<Reproducer>(new RandomReproducer(m_populationCount));
-    }
+    // if (reproducerConfig == "Random")
+    // {
+    m_reproducer = shared_ptr<Reproducer>(new RandomReproducer(m_populationCount));
+    // }
 }
 
 void Solver::PrintPopulation()
@@ -127,6 +127,7 @@ void Solver::SaveOutput()
     else
     {
         // Failed for some other reason
+        cout << "Failed to create output directory" << endl;
     }
 
 } // namespace SymbolicRegression
