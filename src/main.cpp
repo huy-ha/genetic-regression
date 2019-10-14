@@ -10,14 +10,23 @@ using namespace std::chrono;
 using namespace SymbolicRegression;
 int main(int argc, char **argv)
 {
+    string configFile = "default.config";
+    string outputDir;
     if (argc < 2)
     {
         cout << "Please supply an output directory" << endl;
         return -1;
     }
+    outputDir = string(argv[1]);
+    if (argc == 3)
+    {
+        // output dir and config supplied
+        configFile = string(argv[2]);
+    }
+
     try
     {
-        Config config("default.config", string(argv[1]));
+        Config config(configFile, outputDir);
         cout << string(config) << endl;
         srand(0);
         Solver solver = Solver();

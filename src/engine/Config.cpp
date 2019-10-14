@@ -14,6 +14,9 @@ shared_ptr<vector<tuple<float, float>>> Config::Data(new vector<tuple<float, flo
 Config::Config(string configFilePath, string outputFilePath)
 {
     m_configs.insert(make_pair("Input", "data.txt"));
+
+    m_configs.insert(make_pair("Reproducer", "Random"));
+
     m_configs.insert(make_pair("PopulationCount", "100"));
     m_configs.insert(make_pair("GenerationCount", "50000"));
     m_configs.insert(make_pair("ElitesCount", "1"));
@@ -50,7 +53,7 @@ int Config::GetInt(std::string key)
 {
     if (IsValidKey(key))
     {
-        return stoi(m_configs.at(key));
+        return stoi(Instance->m_configs.at(key));
     }
     throw std::exception(("Invalid Key" + key).c_str());
 }
@@ -58,7 +61,7 @@ float Config::GetFloat(std::string key)
 {
     if (IsValidKey(key))
     {
-        return stof(m_configs.at(key));
+        return stof(Instance->m_configs.at(key));
     }
     throw std::exception(("Invalid Key" + key).c_str());
 }
@@ -66,7 +69,7 @@ std::string Config::GetString(std::string key)
 {
     if (IsValidKey(key))
     {
-        return m_configs.at(key);
+        return Instance->m_configs.at(key);
     }
     throw std::exception(("Invalid Key" + key).c_str());
 }
@@ -96,7 +99,7 @@ void Config::ParseConfigLine(string configLine)
 
 bool Config::IsValidKey(string key)
 {
-    return m_configs.find(key) != m_configs.end();
+    return Instance->m_configs.find(key) != Instance->m_configs.end();
 }
 
 void Config::BadConfigFile(string message)

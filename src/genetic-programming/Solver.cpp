@@ -15,9 +15,13 @@ namespace SymbolicRegression
 using namespace std;
 Solver::Solver()
 {
-    m_populationCount = Config::Instance->GetInt("PopulationCount");
-    m_eliteCount = Config::Instance->GetInt("ElitesCount");
-    m_reproducer = shared_ptr<Reproducer>(new RandomReproducer(m_populationCount));
+    m_populationCount = Config::GetInt("PopulationCount");
+    m_eliteCount = Config::GetInt("ElitesCount");
+    string reproducerConfig = Config::GetString("Reproducer");
+    if (reproducerConfig == "Random")
+    {
+        m_reproducer = shared_ptr<Reproducer>(new RandomReproducer(m_populationCount));
+    }
 }
 
 void Solver::PrintPopulation()
@@ -43,7 +47,7 @@ void Solver::InitializePopulation()
 
 void Solver::Run()
 {
-    int generationCount = Config::Instance->GetInt("GenerationCount");
+    int generationCount = Config::GetInt("GenerationCount");
     InitializePopulation();
     for (int i = 0; i < generationCount; i++)
     {
@@ -102,7 +106,7 @@ void Solver::Evolve()
 
 void Solver::SaveOutput()
 {
-    string dirpath = Config::Instance->GetString("OutputPath");
+    string dirpath = Config::GetString("OutputPath");
     LPCSTR w_dirpath = LPCSTR(dirpath.c_str());
     //  wstring(dirpath.begin(), dirpath.end()).c_str();
     if (CreateDirectory(w_dirpath, NULL) || ERROR_ALREADY_EXISTS == GetLastError())
@@ -116,7 +120,7 @@ void Solver::SaveOutput()
         }
         else
         {
-            cout << "Error opening " << Config::Instance->GetString("OutputPath") + "HighestFitness.txt" << endl;
+            cout << "Error opening " << dirpath + "HighestFitness.txt" << endl;
         }
         highestFitnessOutput.close();
     }
