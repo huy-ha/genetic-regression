@@ -7,6 +7,7 @@
 #include "../engine/OutputLogger.hpp"
 #include "reproducers/RandomReproducer.hpp"
 #include "reproducers/MutatorReproducer.hpp"
+#include "reproducers/CrossoverMutatorReproducer.hpp"
 #include <fstream>
 #include <windows.h>
 #include "../expression/Constant.hpp"
@@ -20,7 +21,11 @@ Solver::Solver()
     m_populationCount = Config::GetInt("PopulationCount");
     m_eliteCount = Config::GetInt("ElitesCount");
     string reproducerConfig = Config::GetString("Reproducer");
-    if (reproducerConfig == "Mutator")
+    if (reproducerConfig == "CrossoverMutator")
+    {
+        m_reproducer = shared_ptr<Reproducer>(new CrossoverMutatorReproducer(m_populationCount));
+    }
+    else if (reproducerConfig == "Mutator")
     {
         m_reproducer = shared_ptr<Reproducer>(new MutatorReproducer(m_populationCount));
     }
@@ -90,17 +95,17 @@ void Solver::Evolve()
         m_prevHighestFitness = bestExpression->Fitness();
         cout << "FITNESS " << m_prevHighestFitness
              << " after " << OutputLogger::GetEvaluations() << " evalutions" << endl;
-        cout << "\t" + bestExpression->ToString() << endl;
-        cout << "\t"
-             << "f(0)=" << bestExpression->ToFunction()(0) << endl;
-        cout << "\t"
-             << "f(1)=" << bestExpression->ToFunction()(1) << endl;
-        cout << "\t"
-             << "f(2)=" << bestExpression->ToFunction()(2) << endl;
+        // cout << "\t" + bestExpression->ToString() << endl;
+        // cout << "\t"
+        //      << "f(0)=" << bestExpression->ToFunction()(0) << endl;
+        // cout << "\t"
+        //      << "f(1)=" << bestExpression->ToFunction()(1) << endl;
+        // cout << "\t"
+        //      << "f(2)=" << bestExpression->ToFunction()(2) << endl;
     }
     // Selection
     auto it = m_population.begin();
-    advance(it, m_population.size() * 0.7f);
+    advance(it, m_population.size() * 0.5f);
     m_population.erase(it, m_population.end());
 
     // Reproduce

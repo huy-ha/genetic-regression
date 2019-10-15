@@ -4,17 +4,17 @@
 #include <deque>
 #include <algorithm>
 #include "../engine/Config.hpp"
-#include "../../engine/OutputLogger.hpp"
-#include "../Solver.hpp"
 namespace SymbolicRegression
 {
 using namespace std;
 mutex mu;
-static int saveEval = 0;
+
 Reproducer::Reproducer(int populationCount)
 {
     m_populationCount = populationCount;
+    cout << "getting min threads" << endl;
     m_minThreads = Config::GetInt("MinThreads");
+    cout << "getting max threads" << endl;
     m_maxThreads = Config::GetInt("MaxThreads");
 }
 
@@ -37,12 +37,6 @@ void Reproducer::TryInsertOffspring(shared_ptr<Expression> exp)
     {
         m_stop = true;
     }
-
-    if (OutputLogger::GetEvaluations() > saveEval * 100000)
-    {
-        Solver::Instance()->SaveOutput();
-        saveEval++;
-    }
 }
 
 shared_ptr<list<shared_ptr<Expression>>> Reproducer::AsyncReproduce(const list<shared_ptr<Expression>> &parents)
@@ -60,6 +54,10 @@ shared_ptr<list<shared_ptr<Expression>>> Reproducer::AsyncReproduce(const list<s
         {
             int idx1 = int(Expression::RandomF(0, float(parentCount) - 1));
             int idx2 = (idx1 + (int(Expression::RandomF(0, float(parentCount))))) % parentCount;
+            while (idx2 == idx1)
+            {
+                idx2 = (idx2 + 1) % parentCount;
+            }
             auto p1 = parents.begin();
             advance(p1, idx1);
             auto p2 = parents.begin();
@@ -87,6 +85,10 @@ shared_ptr<list<shared_ptr<Expression>>> Reproducer::Reproduce(const list<shared
     {
         int idx1 = int(Expression::RandomF(0, float(parentCount) - 1));
         int idx2 = (idx1 + (int(Expression::RandomF(0, float(parentCount))))) % parentCount;
+        while (idx2 == idx1)
+        {
+            idx2 = (idx2 + 1) % parentCount;
+        }
         auto p1 = parents.begin();
         advance(p1, idx1);
         auto p2 = parents.begin();

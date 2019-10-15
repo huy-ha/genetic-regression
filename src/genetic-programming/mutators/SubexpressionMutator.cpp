@@ -6,13 +6,6 @@ namespace SymbolicRegression
 {
 using namespace std;
 
-mutex printMutex;
-static void print(string s)
-{
-    lock_guard<mutex> lock(printMutex);
-    cout << s << endl;
-}
-
 shared_ptr<Expression> SubexpressionMutator::Mutate(shared_ptr<Expression> exp)
 {
     auto collapsedExp = exp->Collapse(exp);

@@ -18,6 +18,7 @@ public:
     shared_ptr<Expression> static GenerateRandomBinaryOperator(int level);
 
     friend class SubexpressionMutator;
+    friend class CrossoverMutatorReproducer;
 
 public:
     /*

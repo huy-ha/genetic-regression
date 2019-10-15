@@ -13,7 +13,7 @@
 #include <algorithm>
 #include "../engine/OutputLogger.hpp"
 #include <typeinfo>
-
+#include "../Solver.hpp"
 namespace SymbolicRegression
 {
 using namespace std;
@@ -45,11 +45,17 @@ Expression::Expression(const Expression &other)
     }
 }
 
+static int saveEval = 0;
 float Expression::Fitness()
 {
     if (m_fitness == -1)
     {
         m_fitness = CalculateFitness();
+    }
+    if (OutputLogger::GetEvaluations() > saveEval * 100000)
+    {
+        Solver::Instance()->SaveOutput();
+        saveEval++;
     }
     return m_fitness;
 }
@@ -199,7 +205,7 @@ shared_ptr<Expression> Expression::GenerateRandomBinaryOperator(int level)
 shared_ptr<Expression> Expression::GenerateRandomExpression(int level, bool noConstant, bool noZero, bool noTrig)
 {
     // prioritize constants
-    if (RandomF() > 0.5f || level < Config::GetInt("MaxDepth") - 1)
+    if (RandomF() > 0.5f || level >= Config::GetInt("MaxDepth") - 1)
     {
         return GenerateRandomZeroOrderExpression(level);
     }

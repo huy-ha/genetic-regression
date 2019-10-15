@@ -12,6 +12,7 @@ public:
             return x;
         };
         m_order = 0;
+        m_subexpressions.clear();
     }
 
     inline Variable(const Variable &other) : Expression(other)
@@ -20,6 +21,7 @@ public:
             return x;
         };
         m_order = 0;
+        m_subexpressions.clear();
     }
 
     inline virtual std::string ToString() const override
