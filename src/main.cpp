@@ -4,14 +4,15 @@
 #include <algorithm>
 #include "genetic-programming/Solver.hpp"
 #include <chrono>
-#include "genetic-programming/mutators/ConstantMutator.hpp"
+// #include "genetic-programming/mutators/ConstantMutator.hpp"
+#include "genetic-programming/mutators/SubexpressionMutator.hpp"
 using namespace std;
 using namespace std::chrono;
 using namespace SymbolicRegression;
 int main(int argc, char **argv)
 {
     // srand(time(NULL));
-    srand(24);
+    srand(0);
     auto exp1 = Expression::GenerateRandomExpression();
     auto exp2 = Expression::Copy(exp1);
     auto f1 = exp1->ToFunction();
@@ -28,8 +29,9 @@ int main(int argc, char **argv)
 
     cout << endl
          << "Mutating exp1" << endl;
-    ConstantMutator mutator;
-    exp1 = mutator.Mutate(exp1);
+    exp1 = SubexpressionMutator::Mutate(exp1);
+    exp1 = SubexpressionMutator::Mutate(exp1);
+    // exp1 = SubexpressionMutator::Mutate(exp1);
     cout << "f1 now:" << exp1->ToString() << endl;
     cout << "f1(0) = " << f1(0) << endl;
     cout << "f1(1) = " << f1(1) << endl;

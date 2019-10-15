@@ -34,7 +34,10 @@ public:
     virtual string ToString() const = 0;
     static shared_ptr<Expression> Copy(const shared_ptr<Expression> &source);
 
+    inline int Order() const { return m_order; }
+
     shared_ptr<vector<shared_ptr<Expression>>> Collapse(shared_ptr<Expression> self);
+    friend class SubexpressionMutator;
 
 protected:
     Expression();
