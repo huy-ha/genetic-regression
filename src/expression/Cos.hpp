@@ -7,9 +7,9 @@ namespace SymbolicRegression
 class Cos : public Expression
 {
 public:
-    inline Cos() : Expression()
+    inline Cos(shared_ptr<Expression> parent) : Expression(parent)
     {
-        m_subexpressions.push_back(Expression::GenerateRandomExpression(true));
+        m_subexpressions.push_back(Expression::GenerateRandomExpression(m_this, true, true));
         m_func = [&](float x) {
             return cosf(m_subexpressions[0]->ToFunction()(x));
         };

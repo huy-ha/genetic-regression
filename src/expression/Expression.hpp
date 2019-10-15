@@ -11,9 +11,10 @@ namespace SymbolicRegression
 using namespace std;
 class Expression
 {
+    //TODO handle copy constructor with parent
 public:
     // Main API for other classes to use
-    shared_ptr<Expression> static GenerateRandomExpression(bool noConstant = false, bool noZero = false);
+    shared_ptr<Expression> static GenerateRandomExpression(shared_ptr<Expression> parent, bool noConstant = false, bool noZero = false);
     static function<bool(const shared_ptr<Expression> &, const shared_ptr<Expression> &)> FitnessComparer;
     // Function Object functionality
     virtual function<float(float)> ToFunction() const;
@@ -40,14 +41,17 @@ public:
     friend class SubexpressionMutator;
 
 protected:
-    Expression();
+    Expression(shared_ptr<Expression> parent);
     Expression(const Expression &other);
     template <typename R, typename... Types>
     inline static int NumArgs(function<R(Types...)> f) { return sizeof...(Types); }
+    static shared_ptr<Expression> Simplify(shared_ptr<Expression> exp);
 
 protected:
+    shared_ptr<Expression> m_this;
     int m_order = -1;                  // How many parameters the current expression needs
     function<float(float)> m_func = 0; //function presenting this expression node's function
+    shared_ptr<Expression> m_parent = nullptr;
     vector<shared_ptr<Expression>> m_subexpressions;
     float m_fitness = -1;
 

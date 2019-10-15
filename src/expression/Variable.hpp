@@ -6,7 +6,7 @@ namespace SymbolicRegression
 class Variable : public Expression
 {
 public:
-    inline Variable() : Expression()
+    inline Variable(shared_ptr<Expression> parent) : Expression(parent)
     {
         m_func = [&](float x) {
             return x;

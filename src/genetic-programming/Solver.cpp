@@ -41,7 +41,7 @@ void Solver::InitializePopulation()
     // m_population.emplace_front(shared_ptr<Expression>(new Constant(0)));
     while (m_population.size() < m_populationCount)
     {
-        auto newExp = Expression::GenerateRandomExpression(true);
+        auto newExp = Expression::GenerateRandomExpression(nullptr, true);
         if (!any_of(m_population.begin(), m_population.end(), [&](const shared_ptr<Expression> &exp) {
                 return exp->ToString() == newExp->ToString();
             }))
@@ -67,6 +67,9 @@ void Solver::Run()
         }
     }
     SaveOutput();
+    m_population.sort(Expression::FitnessComparer);
+    auto finalBest = *m_population.begin();
+    cout << finalBest->ToString() << endl;
 }
 
 void Solver::Evolve()
@@ -122,7 +125,6 @@ void Solver::SaveOutput()
     OutputLogger::Clear("FinalBest");
     m_population.sort(Expression::FitnessComparer);
     auto finalBest = *m_population.begin();
-    cout << finalBest->ToString() << endl;
     OutputLogger::Log("FinalBest", finalBest->ToString());
     auto f = finalBest->ToFunction();
     for (float x = 0; x < 10; x += 0.001f)
