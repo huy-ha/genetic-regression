@@ -1,14 +1,22 @@
 #include "SubexpressionMutator.hpp"
 #include <vector>
 #include <algorithm>
+#include "../../engine/Config.hpp"
 namespace SymbolicRegression
 {
 using namespace std;
+
+mutex printMutex;
+static void print(string s)
+{
+    lock_guard<mutex> lock(printMutex);
+    cout << s << endl;
+}
+
 shared_ptr<Expression> SubexpressionMutator::Mutate(shared_ptr<Expression> exp)
 {
     auto collapsedExp = exp->Collapse(exp);
     vector<shared_ptr<Expression>> operators;
-    int i = int(Expression::RandomF(0, 100));
     copy_if(
         collapsedExp->begin(),
         collapsedExp->end(),
@@ -18,10 +26,13 @@ shared_ptr<Expression> SubexpressionMutator::Mutate(shared_ptr<Expression> exp)
         });
     if (operators.size() == 0)
         return exp;
-    i = i % operators.size();
-    auto expToChange = operators[i];
-    i = int(Expression::RandomF(0, float(expToChange->Order()) - 1.0f));
-    expToChange->m_subexpressions[i] = Expression::GenerateRandomExpression(expToChange->Level() + 1);
+
+    // choose random operator
+    auto expToChange = operators[int(Expression::RandomF(0, 100)) % operators.size()];
+
+    // change a random subexpression of the operator
+    expToChange->m_subexpressions[int(Expression::RandomF(0, float(expToChange->Order()) - 1.0f))] = Expression::GenerateRandomExpression(expToChange->Level() + 1);
+
     return exp;
 }
 } // namespace SymbolicRegression

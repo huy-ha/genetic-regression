@@ -40,7 +40,6 @@ void Reproducer::TryInsertOffspring(shared_ptr<Expression> exp)
 
     if (OutputLogger::GetEvaluations() > saveEval * 100000)
     {
-        cout << "saving ..." << endl;
         Solver::Instance()->SaveOutput();
         saveEval++;
     }

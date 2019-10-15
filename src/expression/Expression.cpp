@@ -199,7 +199,7 @@ shared_ptr<Expression> Expression::GenerateRandomBinaryOperator(int level)
 shared_ptr<Expression> Expression::GenerateRandomExpression(int level, bool noConstant, bool noZero, bool noTrig)
 {
     // prioritize constants
-    if (RandomF() > 0.5f)
+    if (RandomF() > 0.5f || level < Config::GetInt("MaxDepth") - 1)
     {
         return GenerateRandomZeroOrderExpression(level);
     }

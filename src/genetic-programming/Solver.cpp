@@ -81,7 +81,7 @@ void Solver::Evolve()
     for_each(m_population.begin(), m_population.end(),
              [](auto &exp) { exp->Fitness(); });
     // Sort in decreasing order of fitness
-    m_population.sort();
+    m_population.sort(Expression::FitnessComparer);
 
     // Find best in current population
     shared_ptr<Expression> bestExpression = *(m_population.begin());
@@ -91,10 +91,16 @@ void Solver::Evolve()
         cout << "FITNESS " << m_prevHighestFitness
              << " after " << OutputLogger::GetEvaluations() << " evalutions" << endl;
         cout << "\t" + bestExpression->ToString() << endl;
+        cout << "\t"
+             << "f(0)=" << bestExpression->ToFunction()(0) << endl;
+        cout << "\t"
+             << "f(1)=" << bestExpression->ToFunction()(1) << endl;
+        cout << "\t"
+             << "f(2)=" << bestExpression->ToFunction()(2) << endl;
     }
     // Selection
     auto it = m_population.begin();
-    advance(it, m_population.size() * 0.8f);
+    advance(it, m_population.size() * 0.7f);
     m_population.erase(it, m_population.end());
 
     // Reproduce
