@@ -4,7 +4,7 @@
 #include <algorithm>
 #include "genetic-programming/Solver.hpp"
 #include <chrono>
-
+#include "genetic-programming/mutators/ConstantMutator.hpp"
 using namespace std;
 using namespace std::chrono;
 using namespace SymbolicRegression;
@@ -25,6 +25,15 @@ int main(int argc, char **argv)
     cout << "f2(0) = " << f2(0) << endl;
     cout << "f2(1) = " << f2(1) << endl;
     cout << "f2(2) = " << f2(2) << endl;
+
+    cout << endl
+         << "Mutating exp1" << endl;
+    ConstantMutator mutator;
+    exp1 = mutator.Mutate(exp1);
+    cout << "f1 now:" << exp1->ToString() << endl;
+    cout << "f1(0) = " << f1(0) << endl;
+    cout << "f1(1) = " << f1(1) << endl;
+    cout << "f1(2) = " << f1(2) << endl;
     return 0;
 
     string configFile = "default.config";

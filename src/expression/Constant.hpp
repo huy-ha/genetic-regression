@@ -20,6 +20,7 @@ public:
     {
         return std::to_string(m_k);
     }
+    friend class ConstantMutator;
 
 protected:
     float m_k; // value of constant
