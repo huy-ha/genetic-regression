@@ -16,6 +16,8 @@ shared_ptr<Expression> SubexpressionMutator::Mutate(shared_ptr<Expression> exp)
         [](auto e) {
             return e->Order() > 0;
         });
+    if (operators.size() == 0)
+        return exp;
     i = i % operators.size();
     auto expToChange = operators[i];
     i = int(Expression::RandomF(0, float(expToChange->Order()) - 1.0f));

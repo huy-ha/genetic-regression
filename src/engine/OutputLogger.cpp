@@ -1,5 +1,7 @@
 #include "OutputLogger.hpp"
 #include <memory>
+#include <iostream>
+#include <algorithm>
 namespace SymbolicRegression
 {
 using namespace std;
@@ -15,7 +17,23 @@ shared_ptr<OutputLogger> OutputLogger::Instance()
 
 OutputLogger::OutputLogger()
 {
+    m_log.insert(pair<string, string>("Config", ""));
     m_log.insert(pair<string, string>("HighestFitness", ""));
+    m_log.insert(pair<string, string>("FinalBest", ""));
+}
+
+shared_ptr<vector<string>> OutputLogger::GetKeys()
+{
+    shared_ptr<vector<string>> keys(new vector<string>());
+    keys->reserve(m_instance->m_log.size());
+    for (auto const &it_log : m_instance->m_log)
+        keys->push_back(it_log.first);
+    return keys;
+}
+
+void OutputLogger::Clear(string key)
+{
+    m_instance->m_log[key] = "";
 }
 
 int OutputLogger::GetEvaluations()

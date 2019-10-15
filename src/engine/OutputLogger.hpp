@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <mutex>
+#include <vector>
 namespace SymbolicRegression
 {
 using namespace std;
@@ -16,6 +17,8 @@ public:
     static shared_ptr<OutputLogger> Instance(); // Singleton
     static void IncrementEvaluations();
     static int GetEvaluations();
+    static shared_ptr<vector<string>> GetKeys();
+    static void Clear(string key);
 
 private:
     map<string, string> m_log;

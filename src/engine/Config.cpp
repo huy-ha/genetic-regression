@@ -15,7 +15,7 @@ Config::Config(string configFilePath, string outputFilePath)
 {
     m_configs.insert(make_pair("Input", "data.txt"));
 
-    m_configs.insert(make_pair("Reproducer", "Random"));
+    m_configs.insert(make_pair("Reproducer", "Mutator"));
     m_configs.insert(make_pair("MinThreads", "20"));
     m_configs.insert(make_pair("MaxThreads", "-1"));
 

@@ -3,41 +3,14 @@
 #include "engine/Config.hpp"
 #include <algorithm>
 #include "genetic-programming/Solver.hpp"
+#include "engine/OutputLogger.hpp"
 #include <chrono>
-// #include "genetic-programming/mutators/ConstantMutator.hpp"
-#include "genetic-programming/mutators/SubexpressionMutator.hpp"
 using namespace std;
 using namespace std::chrono;
 using namespace SymbolicRegression;
 int main(int argc, char **argv)
 {
-    // srand(time(NULL));
-    srand(0);
-    auto exp1 = Expression::GenerateRandomExpression();
-    auto exp2 = Expression::Copy(exp1);
-    auto f1 = exp1->ToFunction();
-    auto f2 = exp2->ToFunction();
-    cout << "started with \t" << exp1->ToString() << endl;
-    cout << "f1(0) = " << f1(0) << endl;
-    cout << "f1(1) = " << f1(1) << endl;
-    cout << "f1(2) = " << f1(2) << endl;
-
-    cout << "ended with \t" << exp2->ToString() << endl;
-    cout << "f2(0) = " << f2(0) << endl;
-    cout << "f2(1) = " << f2(1) << endl;
-    cout << "f2(2) = " << f2(2) << endl;
-
-    cout << endl
-         << "Mutating exp1" << endl;
-    exp1 = SubexpressionMutator::Mutate(exp1);
-    exp1 = SubexpressionMutator::Mutate(exp1);
-    // exp1 = SubexpressionMutator::Mutate(exp1);
-    cout << "f1 now:" << exp1->ToString() << endl;
-    cout << "f1(0) = " << f1(0) << endl;
-    cout << "f1(1) = " << f1(1) << endl;
-    cout << "f1(2) = " << f1(2) << endl;
-    return 0;
-
+    int seed = 0;
     string configFile = "default.config";
     string outputDir;
     if (argc < 2)
@@ -46,15 +19,25 @@ int main(int argc, char **argv)
         return -1;
     }
     outputDir = string(argv[1]);
-    if (argc == 3)
+    if (argc > 2)
     {
         // output dir and config supplied
         configFile = string(argv[2]);
     }
+    if (argc > 3)
+    {
+        seed = stoi(argv[3]);
+    }
+    cout << endl
+         << "SEED:" << seed << endl
+         << endl;
+    srand(seed);
     try
     {
         Config config(configFile, outputDir);
         cout << string(config) << endl;
+        OutputLogger::Log("Config", "Seed:" + to_string(seed));
+        OutputLogger::Log("Config", string(config));
         Solver solver = Solver();
         auto start = high_resolution_clock::now();
         solver.Run();

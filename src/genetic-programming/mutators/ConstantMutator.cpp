@@ -19,6 +19,8 @@ shared_ptr<Expression> ConstantMutator::Mutate(shared_ptr<Expression> exp)
         [](auto e) {
             return string(typeid(*e).name()) == string("class SymbolicRegression::Constant");
         });
+    if (constants.size() == 0)
+        return exp;
     i = i % constants.size();
     auto constantToMutate = dynamic_pointer_cast<Constant>(constants[i]);
     constantToMutate->m_k = constantToMutate->m_k + Expression::RandomF() * 0.1f;

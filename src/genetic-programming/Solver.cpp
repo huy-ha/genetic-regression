@@ -6,8 +6,10 @@
 #include <iterator>
 #include "../engine/OutputLogger.hpp"
 #include "reproducers/RandomReproducer.hpp"
+#include "reproducers/MutatorReproducer.hpp"
 #include <fstream>
 #include <windows.h>
+#include "../expression/Constant.hpp"
 
 namespace SymbolicRegression
 {
@@ -17,10 +19,14 @@ Solver::Solver()
     m_populationCount = Config::GetInt("PopulationCount");
     m_eliteCount = Config::GetInt("ElitesCount");
     string reproducerConfig = Config::GetString("Reproducer");
-    // if (reproducerConfig == "Random")
-    // {
-    m_reproducer = shared_ptr<Reproducer>(new RandomReproducer(m_populationCount));
-    // }
+    if (reproducerConfig == "Mutator")
+    {
+        m_reproducer = shared_ptr<Reproducer>(new MutatorReproducer(m_populationCount));
+    }
+    else
+    {
+        m_reproducer = shared_ptr<Reproducer>(new RandomReproducer(m_populationCount));
+    }
 }
 
 void Solver::PrintPopulation()
@@ -32,6 +38,7 @@ void Solver::PrintPopulation()
 }
 void Solver::InitializePopulation()
 {
+    // m_population.emplace_front(shared_ptr<Expression>(new Constant(0)));
     while (m_population.size() < m_populationCount)
     {
         auto newExp = Expression::GenerateRandomExpression(true);
@@ -47,12 +54,18 @@ void Solver::InitializePopulation()
 void Solver::Run()
 {
     int generationCount = Config::GetInt("GenerationCount");
+    int saveEvals = 0;
     InitializePopulation();
     for (int i = 0; i < generationCount; i++)
     {
         Evolve();
+        if (OutputLogger::GetEvaluations() > saveEvals * 100000)
+        {
+            saveEvals++;
+            cout << "saving at " << OutputLogger::GetEvaluations() << " evaluations " << endl;
+            SaveOutput();
+        }
     }
-    cout << (*m_population.begin())->ToString() << endl;
     SaveOutput();
 }
 
@@ -78,8 +91,8 @@ void Solver::Evolve()
     m_population.erase(it, m_population.end());
 
     // Reproduce
-    auto offspring = m_reproducer->AsyncReproduce(m_population);
-
+    // auto offspring = m_reproducer->AsyncReproduce(m_population);
+    auto offspring = m_reproducer->Reproduce(m_population);
     // Handle Elites
     auto eliteEnd = m_population.begin();
     advance(eliteEnd, m_eliteCount);
@@ -106,23 +119,38 @@ void Solver::Evolve()
 
 void Solver::SaveOutput()
 {
+    OutputLogger::Clear("FinalBest");
+    m_population.sort(Expression::FitnessComparer);
+    auto finalBest = *m_population.begin();
+    cout << finalBest->ToString() << endl;
+    OutputLogger::Log("FinalBest", finalBest->ToString());
+    auto f = finalBest->ToFunction();
+    for (float x = 0; x < 10; x += 0.001f)
+    {
+        OutputLogger::Log("FinalBest", to_string(x) + " " + to_string(f(x)));
+    }
+
     string dirpath = Config::GetString("OutputPath");
     LPCSTR w_dirpath = LPCSTR(dirpath.c_str());
     //  wstring(dirpath.begin(), dirpath.end()).c_str();
     if (CreateDirectory(w_dirpath, NULL) || ERROR_ALREADY_EXISTS == GetLastError())
     {
         // Directory created
-        ofstream highestFitnessOutput;
-        highestFitnessOutput.open(dirpath + "HighestFitness.txt");
-        if (highestFitnessOutput.is_open())
+        auto keys = OutputLogger::GetKeys();
+        for (auto &key : *keys)
         {
-            highestFitnessOutput << OutputLogger::Get("HighestFitness");
+            ofstream f;
+            f.open(dirpath + key + ".txt");
+            if (f.is_open())
+            {
+                f << OutputLogger::Get(key);
+            }
+            else
+            {
+                cout << "Error opening " << dirpath + key + ".txt" << endl;
+            }
+            f.close();
         }
-        else
-        {
-            cout << "Error opening " << dirpath + "HighestFitness.txt" << endl;
-        }
-        highestFitnessOutput.close();
     }
     else
     {
