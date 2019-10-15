@@ -72,7 +72,7 @@ shared_ptr<Expression> Expression::Initialize(shared_ptr<Expression> self, share
     for_each(self->m_subexpressions.begin(), self->m_subexpressions.end(), [&](const shared_ptr<Expression> &subexp) {
         subexp->Initialize(subexp, self);
     });
-    return self;
+    return Simplify(self);
 }
 
 shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
@@ -90,22 +90,15 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
             });
         if (operators.size() == 0)
             return exp;
-        cout << operators.size() << " operators in " << exp->ToString() << endl;
         // find first operator that has a constants as inputs
         auto it = find_if(operators.begin(), operators.end(), [](auto op) {
             return all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), [&](auto subexpression) {
-                cout << "\t" << typeid(*op).name() << ":" << typeid(*subexpression).name() << endl;
                 return string(typeid(*subexpression).name()) == string("class SymbolicRegression::Constant");
             });
         });
         // no operator with constants
         if (it == operators.end())
-        {
-            cout << "Found None" << endl;
             return exp;
-        }
-        else
-            cout << "Found one " << typeid(*(*it)).name() << endl;
         // replace this node
         auto expToSimplify = *it;
 
@@ -117,7 +110,6 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
             return replacementConstant;
         }
         auto parent = expToSimplify->m_parent;
-        cout << val << endl;
         for (int i = 0; i < parent->m_subexpressions.size(); i++)
         {
             if (string(parent->m_subexpressions[i]->ToString()) == expToSimplify->ToString())
@@ -143,7 +135,7 @@ shared_ptr<vector<shared_ptr<Expression>>> Expression::Collapse(shared_ptr<Expre
 shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant, bool noZero, bool noTrig)
 {
     // prioritize constants
-    if (RandomF() > 0.3f)
+    if (RandomF() > 0.5f)
     {
         if ((RandomF() > 0.5f || noConstant) && !noZero)
         {
@@ -157,7 +149,7 @@ shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant, boo
     // consider operators
 
     //trig functions with low probability
-    if (RandomF() > 0.8f && !noZero && !noTrig)
+    if (RandomF() > 0.6f && !noZero && !noTrig)
     {
         // equal probability of cos and sin
         return Initialize(

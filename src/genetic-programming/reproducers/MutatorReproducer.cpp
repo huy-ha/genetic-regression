@@ -13,13 +13,14 @@ shared_ptr<Expression> MutatorReproducer::CreateOffspring(const shared_ptr<Expre
 {
     shared_ptr<Expression> child;
     // Copy parent 1
-    float parentFitness = p1->Fitness();
+    float parentFitness = p2->Fitness();
     // Mutate child
     do
     {
-        child = Expression::Copy(p1);
+        child = Expression::Copy(p2);
         child = SubexpressionMutator::Mutate(child);
         child = ConstantMutator::Mutate(child);
+        child = Expression::Simplify(child);
     } while (child->Fitness() < parentFitness);
 
     return child;

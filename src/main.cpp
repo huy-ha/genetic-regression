@@ -10,12 +10,6 @@ using namespace std::chrono;
 using namespace SymbolicRegression;
 int main(int argc, char **argv)
 {
-    srand(7);
-    auto exp = Expression::GenerateRandomExpression(true);
-    cout << "before " << exp->ToString() << endl;
-    exp = Expression::Simplify(exp);
-    cout << "after " << exp->ToString() << endl;
-    return 0;
     int seed = 0;
     string configFile = "default.config";
     string outputDir;

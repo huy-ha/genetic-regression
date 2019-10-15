@@ -62,7 +62,7 @@ void Solver::Run()
         if (OutputLogger::GetEvaluations() > saveEvals * 100000)
         {
             saveEvals++;
-            cout << "saving at " << OutputLogger::GetEvaluations() << " evaluations " << endl;
+            // cout << "saving at " << OutputLogger::GetEvaluations() << " evaluations " << endl;
             SaveOutput();
         }
     }
