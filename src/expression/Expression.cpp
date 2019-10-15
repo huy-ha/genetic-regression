@@ -27,16 +27,18 @@ function<bool(
 
 mutex Expression::randMutex;
 
-Expression::Expression()
+Expression::Expression(int level)
 {
     m_func = 0;
     m_order = -1;
+    m_level = level;
 }
 
 Expression::Expression(const Expression &other)
 {
     m_order = other.m_order;
     m_func = 0;
+    m_level = other.m_level;
     for (int i = 0; i < other.m_subexpressions.size(); i++)
     {
         m_subexpressions.push_back(Copy(other.m_subexpressions[i]));
@@ -77,9 +79,13 @@ shared_ptr<Expression> Expression::Initialize(shared_ptr<Expression> self, share
 
 shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
 {
+    // int count = 0;
     while (true)
     {
+        // find all operators
         auto collapsedExp = exp->Collapse(exp);
+        if (collapsedExp->size() == 1)
+            return exp;
         vector<shared_ptr<Expression>> operators;
         copy_if(
             collapsedExp->begin(),
@@ -90,32 +96,56 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
             });
         if (operators.size() == 0)
             return exp;
-        // find first operator that has a constants as inputs
-        auto it = find_if(operators.begin(), operators.end(), [](auto op) {
-            return all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), [&](auto subexpression) {
-                return string(typeid(*subexpression).name()) == string("class SymbolicRegression::Constant");
-            });
-        });
-        // no operator with constants
-        if (it == operators.end())
-            return exp;
-        // replace this node
-        auto expToSimplify = *it;
+        // cout << string("simplifying " + exp->Depth() + string(" : ") + exp->ToString() + " for the " + to_string(count++)) << endl;
+        vector<shared_ptr<Expression>>::iterator it;
+        if ((it = find_if(operators.begin(), operators.end(), [](auto op) {
+                 return all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), [&](auto subexpression) {
+                     return string(typeid(*subexpression).name()) == string("class SymbolicRegression::Constant");
+                 });
+             })) != operators.end())
+        {
+            // replace this node
 
-        float val = expToSimplify->ToFunction()(0);
-        auto replacementConstant = shared_ptr<Expression>(new Constant(val));
-        //no parent
-        if (!expToSimplify->m_parent)
-        {
-            return replacementConstant;
-        }
-        auto parent = expToSimplify->m_parent;
-        for (int i = 0; i < parent->m_subexpressions.size(); i++)
-        {
-            if (string(parent->m_subexpressions[i]->ToString()) == expToSimplify->ToString())
+            float val = (*it)->ToFunction()(0);
+            auto replacementConstant = shared_ptr<Expression>(new Constant((*it)->Level(), val));
+            //no parent
+            if (!(*it)->m_parent)
             {
-                parent->m_subexpressions[i] = replacementConstant;
+                return replacementConstant;
             }
+            auto parent = (*it)->m_parent;
+            for (int i = 0; i < parent->m_subexpressions.size(); i++)
+            {
+                if (string(parent->m_subexpressions[i]->ToString()) == (*it)->ToString())
+                {
+                    parent->m_subexpressions[i] = replacementConstant;
+                }
+            }
+        }
+        else if ((it = find_if(operators.begin(), operators.end(), [](auto op) {
+                      return all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), [&](auto subexpression) {
+                          return string(typeid(*subexpression).name()) == string("class SymbolicRegression::Variable");
+                      });
+                  })) != operators.end())
+        {
+            auto replacementConstant = shared_ptr<Expression>(new Constant((*it)->Level(), RandomF(0.0f, 0.2f)));
+            // no parent
+            if (!(*it)->m_parent)
+            {
+                return replacementConstant;
+            }
+            auto parent = (*it)->m_parent;
+            for (int i = 0; i < parent->m_subexpressions.size(); i++)
+            {
+                if (string(parent->m_subexpressions[i]->ToString()) == (*it)->ToString())
+                {
+                    parent->m_subexpressions[i] = replacementConstant;
+                }
+            }
+        }
+        else
+        {
+            return exp;
         }
     }
 }
@@ -132,48 +162,58 @@ shared_ptr<vector<shared_ptr<Expression>>> Expression::Collapse(shared_ptr<Expre
     return output;
 }
 
-shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant, bool noZero, bool noTrig)
+shared_ptr<Expression> Expression::GenerateRandomZeroOrderExpression(int level)
+{
+    if (RandomF() > 0.5f)
+    {
+        return Initialize(shared_ptr<Expression>(new Variable(level)), nullptr);
+    }
+    else
+    {
+        return Initialize(shared_ptr<Expression>(new Constant(level)), nullptr);
+    }
+}
+
+shared_ptr<Expression> Expression::GenerateRandomBinaryOperator(int level)
+{
+    float p = RandomF();
+    //equal probabilty of binary operators
+    if (p > (3.0f / 4.0f))
+    {
+        return Initialize(shared_ptr<Expression>(new Plus(level)), nullptr);
+    }
+    else if (p > (2.0f / 4.0f))
+    {
+        return Initialize(shared_ptr<Expression>(new Minus(level)), nullptr);
+    }
+    else if (p > (1.0f / 4.0f))
+    {
+        return Initialize(shared_ptr<Expression>(new Multiply(level)), nullptr);
+    }
+    else
+    {
+        return Initialize(shared_ptr<Expression>(new Divide(level)), nullptr);
+    }
+}
+
+shared_ptr<Expression> Expression::GenerateRandomExpression(int level, bool noConstant, bool noZero, bool noTrig)
 {
     // prioritize constants
     if (RandomF() > 0.5f)
     {
-        if ((RandomF() > 0.5f || noConstant) && !noZero)
-        {
-            return Initialize(shared_ptr<Expression>(new Variable()), nullptr);
-        }
-        else
-        {
-            return Initialize(shared_ptr<Expression>(new Constant()), nullptr);
-        }
+        return GenerateRandomZeroOrderExpression(level);
     }
     // consider operators
 
     //trig functions with low probability
-    if (RandomF() > 0.6f && !noZero && !noTrig)
+    if (RandomF() > 0.7f && !noZero && !noTrig)
     {
         // equal probability of cos and sin
         return Initialize(
-            shared_ptr<Expression>(RandomF() > 0.5f ? (Expression *)new Cos() : (Expression *)new Sin()),
+            shared_ptr<Expression>(RandomF() > 0.5f ? (Expression *)new Cos(level) : (Expression *)new Sin(level)),
             nullptr);
     }
-    float p = RandomF();
-    //equal probabilty of binary opertaors
-    if (p > (3.0f / 4.0f))
-    {
-        return Initialize(shared_ptr<Expression>(new Plus()), nullptr);
-    }
-    else if (p > (2.0f / 4.0f))
-    {
-        return Initialize(shared_ptr<Expression>(new Minus()), nullptr);
-    }
-    else if (p > (1.0f / 4.0f))
-    {
-        return Initialize(shared_ptr<Expression>(new Multiply()), nullptr);
-    }
-    else
-    {
-        return Initialize(shared_ptr<Expression>(new Divide()), nullptr);
-    }
+    return GenerateRandomBinaryOperator(level);
 }
 
 #define pointer_cast(T, U, p) shared_ptr<T>(new U(*dynamic_pointer_cast<U>(p)));
@@ -185,7 +225,7 @@ shared_ptr<Expression> Expression::Copy(const shared_ptr<Expression> &source)
     string prefix("class SymbolicRegression::");
     if (typeName == prefix + "Constant")
     {
-        exp = pointer_cast(Expression, Constant, source); // shared_ptr<Expression>(new Constant(*dynamic_pointer_cast<Constant>(source)));
+        exp = pointer_cast(Expression, Constant, source);
     }
     else if (typeName == prefix + "Variable")
     {
@@ -219,34 +259,13 @@ shared_ptr<Expression> Expression::Copy(const shared_ptr<Expression> &source)
     {
         cout << "Error: Invalid type name " << typeName << endl;
     }
+    exp = Initialize(exp, nullptr);
     return exp;
 }
 
 function<float(float)> Expression::ToFunction() const
 {
     return m_func;
-}
-
-float Expression::Evaluate(float x)
-{
-    return m_func(x);
-}
-
-float Expression::operator()(float x)
-{
-    return Evaluate(x);
-}
-
-bool Expression::operator<(const Expression &e)
-{
-    if (m_fitness == -1 || e.m_fitness == -1)
-        throw exception("Uncalculated fitness!");
-    return m_fitness > e.m_fitness;
-}
-
-void Expression::AddSubexpression(shared_ptr<Expression> subexpression)
-{
-    m_subexpressions.push_back(subexpression);
 }
 
 float Expression::RandomF()
@@ -258,6 +277,18 @@ float Expression::RandomF(float min, float max)
 {
     lock_guard<mutex> lock(randMutex);
     return (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * (max - min) + min;
+}
+
+int Expression::Depth() const
+{
+    if (m_order == 0)
+        return 1;
+    int childDepth = -1;
+    for (int i = 0; i < m_subexpressions.size(); i++)
+    {
+        childDepth = max(childDepth, m_subexpressions[i]->Depth());
+    }
+    return 1 + childDepth;
 }
 
 } // namespace SymbolicRegression

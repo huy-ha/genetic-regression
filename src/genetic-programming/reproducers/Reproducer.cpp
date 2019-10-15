@@ -4,11 +4,13 @@
 #include <deque>
 #include <algorithm>
 #include "../engine/Config.hpp"
+#include "../../engine/OutputLogger.hpp"
+#include "../Solver.hpp"
 namespace SymbolicRegression
 {
 using namespace std;
 mutex mu;
-
+static int saveEval = 0;
 Reproducer::Reproducer(int populationCount)
 {
     m_populationCount = populationCount;
@@ -18,6 +20,11 @@ Reproducer::Reproducer(int populationCount)
 
 void Reproducer::TryInsertOffspring(shared_ptr<Expression> exp)
 {
+    if (exp->Depth() > Config::GetInt("MaxDepth"))
+    {
+        cout << "Invalid Expression of depth " << exp->Depth() << endl;
+        return;
+    }
     lock_guard<mutex> lock(mu);
     if (m_stop)
         return;
@@ -29,6 +36,13 @@ void Reproducer::TryInsertOffspring(shared_ptr<Expression> exp)
     if (m_offsprings.size() >= m_populationCount)
     {
         m_stop = true;
+    }
+
+    if (OutputLogger::GetEvaluations() > saveEval * 100000)
+    {
+        cout << "saving ..." << endl;
+        Solver::Instance()->SaveOutput();
+        saveEval++;
     }
 }
 

@@ -6,9 +6,12 @@ namespace SymbolicRegression
 class Sin : public Expression
 {
 public:
-    inline Sin() : Expression()
+    inline Sin(int level) : Expression(level)
     {
-        m_subexpressions.push_back(Expression::GenerateRandomExpression(true, false, true));
+        if (level + 1 == Config::GetInt("MaxDepth"))
+            m_subexpressions.push_back(Expression::GenerateRandomZeroOrderExpression(level + 1));
+        else
+            m_subexpressions.push_back(Expression::GenerateRandomExpression(level + 1, true, false, true));
         m_func = [&](float x) {
             return sinf(m_subexpressions[0]->ToFunction()(x));
         };

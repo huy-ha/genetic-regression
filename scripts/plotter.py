@@ -6,9 +6,14 @@ import math
 import os
 
 
-def import_xy(filepath='data.txt'):
-    points = [x.split('\t')
-              for x in open('inputs/' + filepath, "r").readlines()]
+def import_xy(filepath, tab=True):
+    points = []
+    if tab:
+        points = [x.split('\t')
+                  for x in open(filepath, "r").readlines()]
+    else:
+        points = [x.split(' ')
+                  for x in open(filepath, "r").readlines()]
     x = []
     y = []
     for point in points:
@@ -118,23 +123,28 @@ def get_dir_name(runNumber):
     #     plt.show()
 
 if __name__ == "__main__":
-    path = get_dir_name(6) + "FinalBest.txt"
-    x, y, filepath, eqn = import_finalbest(path)
+    dirname = get_dir_name(11)
+    x, y, filepath, eqn = import_finalbest(dirname + "FinalBest.txt")
     plt.scatter(x, y, label=eqn)
-    x, y, title = import_xy()
+    x, y, title = import_xy('inputs/data.txt')
     plt.scatter(x, y, label='dataset')
+    plt.legend()
+    plt.title(eqn)
+    plt.show()
+    x, y, title = import_xy(dirname + "HighestFitness.txt", False)
+    plt.plot(x, y, label=eqn)
     plt.legend()
     plt.title(eqn)
     plt.show()
     exit()
 
-    parser = argparse.ArgumentParser(description='Plot a run')
-    parser.add_argument(
-        '-t', '--title', nargs='+', help='title of output graph', required=False)
-    parser.add_argument('-r', '--runs', nargs='+', action='append',
-                        help='runs to average', required=False)
-    parser.add_argument('-l', '--labels', nargs='+',
-                        help='labels for each group of run', required=False)
-    args = parser.parse_args()
+parser = argparse.ArgumentParser(description='Plot a run')
+parser.add_argument(
+    '-t', '--title', nargs='+', help='title of output graph', required=False)
+parser.add_argument('-r', '--runs', nargs='+', action='append',
+                    help='runs to average', required=False)
+parser.add_argument('-l', '--labels', nargs='+',
+                    help='labels for each group of run', required=False)
+args = parser.parse_args()
 
-    # plot_learning_curve(args)
+# plot_learning_curve(args)

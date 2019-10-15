@@ -38,9 +38,9 @@ int main(int argc, char **argv)
         cout << string(config) << endl;
         OutputLogger::Log("Config", "Seed:" + to_string(seed));
         OutputLogger::Log("Config", string(config));
-        Solver solver = Solver();
+        auto solver = Solver::Instance();
         auto start = high_resolution_clock::now();
-        solver.Run();
+        solver->Run();
         auto stop = high_resolution_clock::now();
         auto ms = duration_cast<milliseconds>(stop - start);
         float seconds = ms.count() / 1000.0f;

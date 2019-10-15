@@ -11,11 +11,12 @@ class Solver
 public:
     Solver();
     void Run();
+    void SaveOutput();
+    static shared_ptr<Solver> Instance();
 
 protected:
     void InitializePopulation();
     void Evolve();
-    void SaveOutput();
     void PrintPopulation();
 
 private:
@@ -24,6 +25,7 @@ private:
     shared_ptr<Reproducer> m_reproducer;
     int m_eliteCount = -1;
     float m_prevHighestFitness = -1;
+    static shared_ptr<Solver> m_instance;
 };
 } // namespace SymbolicRegression
 #endif

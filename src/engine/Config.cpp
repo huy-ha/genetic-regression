@@ -18,6 +18,7 @@ Config::Config(string configFilePath, string outputFilePath)
     m_configs.insert(make_pair("Reproducer", "Mutator"));
     m_configs.insert(make_pair("MinThreads", "20"));
     m_configs.insert(make_pair("MaxThreads", "-1"));
+    m_configs.insert(make_pair("MaxDepth", "8"));
 
     m_configs.insert(make_pair("PopulationCount", "100"));
     m_configs.insert(make_pair("GenerationCount", "50000"));
@@ -57,6 +58,7 @@ int Config::GetInt(std::string key)
     {
         return stoi(Instance->m_configs.at(key));
     }
+    cout << "Invalid Key" + key << endl;
     throw std::exception(("Invalid Key" + key).c_str());
 }
 float Config::GetFloat(std::string key)
@@ -65,6 +67,7 @@ float Config::GetFloat(std::string key)
     {
         return stof(Instance->m_configs.at(key));
     }
+    cout << "Invalid Key" + key << endl;
     throw std::exception(("Invalid Key" + key).c_str());
 }
 std::string Config::GetString(std::string key)
@@ -73,6 +76,7 @@ std::string Config::GetString(std::string key)
     {
         return Instance->m_configs.at(key);
     }
+    cout << "Invalid Key" + key << endl;
     throw std::exception(("Invalid Key" + key).c_str());
 }
 

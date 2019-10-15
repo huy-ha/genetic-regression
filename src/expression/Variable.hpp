@@ -6,7 +6,7 @@ namespace SymbolicRegression
 class Variable : public Expression
 {
 public:
-    inline Variable() : Expression()
+    inline Variable(int level) : Expression(level)
     {
         m_func = [&](float x) {
             return x;

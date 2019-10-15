@@ -6,10 +6,18 @@ namespace SymbolicRegression
 class Minus : public Expression
 {
 public:
-    inline Minus() : Expression()
+    inline Minus(int level) : Expression(level)
     {
-        m_subexpressions.push_back(std::shared_ptr<Expression>(Expression::GenerateRandomExpression()));
-        m_subexpressions.push_back(std::shared_ptr<Expression>(Expression::GenerateRandomExpression()));
+        if (level + 1 == Config::GetInt("MaxDepth"))
+        {
+            m_subexpressions.push_back(Expression::GenerateRandomZeroOrderExpression(level + 1));
+            m_subexpressions.push_back(Expression::GenerateRandomZeroOrderExpression(level + 1));
+        }
+        else
+        {
+            m_subexpressions.push_back(std::shared_ptr<Expression>(Expression::GenerateRandomExpression(level + 1)));
+            m_subexpressions.push_back(std::shared_ptr<Expression>(Expression::GenerateRandomExpression(level + 1)));
+        }
         m_func = [&](float x) {
             return m_subexpressions[0]->ToFunction()(x) - m_subexpressions[1]->ToFunction()(x);
         };

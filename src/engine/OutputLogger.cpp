@@ -1,6 +1,7 @@
 #include "OutputLogger.hpp"
 #include <memory>
 #include <iostream>
+// #include "../genetic-programming/Solver.hpp"
 #include <algorithm>
 namespace SymbolicRegression
 {

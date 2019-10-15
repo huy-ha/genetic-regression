@@ -14,6 +14,7 @@
 namespace SymbolicRegression
 {
 using namespace std;
+shared_ptr<Solver> Solver::m_instance;
 Solver::Solver()
 {
     m_populationCount = Config::GetInt("PopulationCount");
@@ -29,6 +30,15 @@ Solver::Solver()
     }
 }
 
+shared_ptr<Solver> Solver::Instance()
+{
+    if (!m_instance)
+    {
+        m_instance = shared_ptr<Solver>(new Solver());
+    }
+    return m_instance;
+}
+
 void Solver::PrintPopulation()
 {
     for_each(m_population.begin(), m_population.end(), [](auto exp) {
@@ -38,10 +48,9 @@ void Solver::PrintPopulation()
 }
 void Solver::InitializePopulation()
 {
-    // m_population.emplace_front(shared_ptr<Expression>(new Constant(0)));
     while (m_population.size() < m_populationCount)
     {
-        auto newExp = Expression::GenerateRandomExpression(nullptr, true);
+        auto newExp = Expression::GenerateRandomExpression(1, true);
         if (!any_of(m_population.begin(), m_population.end(), [&](const shared_ptr<Expression> &exp) {
                 return exp->ToString() == newExp->ToString();
             }))
@@ -54,17 +63,11 @@ void Solver::InitializePopulation()
 void Solver::Run()
 {
     int generationCount = Config::GetInt("GenerationCount");
-    int saveEvals = 0;
+    int saveEval = 0;
     InitializePopulation();
     for (int i = 0; i < generationCount; i++)
     {
         Evolve();
-        if (OutputLogger::GetEvaluations() > saveEvals * 100000)
-        {
-            saveEvals++;
-            // cout << "saving at " << OutputLogger::GetEvaluations() << " evaluations " << endl;
-            SaveOutput();
-        }
     }
     SaveOutput();
     m_population.sort(Expression::FitnessComparer);
@@ -85,12 +88,13 @@ void Solver::Evolve()
     if (bestExpression->Fitness() > m_prevHighestFitness)
     {
         m_prevHighestFitness = bestExpression->Fitness();
-        cout << bestExpression->ToString() << " : " << m_prevHighestFitness
-             << " after " << OutputLogger::GetEvaluations() << " evaluations" << endl;
+        cout << "FITNESS " << m_prevHighestFitness
+             << " after " << OutputLogger::GetEvaluations() << " evalutions" << endl;
+        cout << "\t" + bestExpression->ToString() << endl;
     }
     // Selection
     auto it = m_population.begin();
-    advance(it, m_population.size() * 0.5f);
+    advance(it, m_population.size() * 0.8f);
     m_population.erase(it, m_population.end());
 
     // Reproduce
@@ -109,6 +113,7 @@ void Solver::Evolve()
     // Ensure size of population
     if (m_population.size() < m_populationCount)
     {
+        cout << "ERROR: LOST EXPRESSIONS" << endl;
         throw exception("Lost Expressions");
     }
     else if (m_population.size() > m_populationCount)
@@ -130,7 +135,6 @@ void Solver::SaveOutput()
     {
         OutputLogger::Log("FinalBest", to_string(x) + " " + to_string(f(x)));
     }
-
     string dirpath = Config::GetString("OutputPath");
     LPCSTR w_dirpath = LPCSTR(dirpath.c_str());
     //  wstring(dirpath.begin(), dirpath.end()).c_str();
@@ -158,6 +162,5 @@ void Solver::SaveOutput()
         // Failed for some other reason
         cout << "Failed to create output directory" << endl;
     }
-
-} // namespace SymbolicRegression
+}
 } // namespace SymbolicRegression
