@@ -10,8 +10,8 @@ using namespace std::chrono;
 using namespace SymbolicRegression;
 int main(int argc, char **argv)
 {
-    srand(time(NULL));
-    // srand(24);
+    // srand(time(NULL));
+    srand(24);
     auto exp1 = Expression::GenerateRandomExpression();
     auto exp2 = Expression::Copy(exp1);
     auto f1 = exp1->ToFunction();

@@ -3,7 +3,8 @@
 #include <memory>
 #include <list>
 #include <map>
-#include "../expression/Expression.hpp"
+#include <string>
+#include "../../expression/Expression.hpp"
 namespace SymbolicRegression
 {
 using namespace std;

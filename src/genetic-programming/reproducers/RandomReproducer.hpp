@@ -1,7 +1,6 @@
 #ifndef _RANDOM_REPRODUCER_HPP_
 #define _RANDOM_REPRODUCER_HPP_
 #include "Reproducer.hpp"
-
 namespace SymbolicRegression
 {
 using namespace std;

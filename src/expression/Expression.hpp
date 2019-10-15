@@ -34,6 +34,8 @@ public:
     virtual string ToString() const = 0;
     static shared_ptr<Expression> Copy(const shared_ptr<Expression> &source);
 
+    shared_ptr<vector<shared_ptr<Expression>>> Collapse(shared_ptr<Expression> self);
+
 protected:
     Expression();
     Expression(const Expression &other);

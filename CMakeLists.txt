@@ -10,6 +10,9 @@ file(GLOB symreg_SRC
     "src/engine/*.cpp"
     "src/expression/*.cpp"
     "src/genetic-programming/*.cpp"
+    "src/genetic-programming/reproducers/*.cpp"
+    "src/genetic-programming/mutators/*.hpp"
+    "src/genetic-programming/mutators/*.cpp"
     "src/*.cpp"
 )
 # include

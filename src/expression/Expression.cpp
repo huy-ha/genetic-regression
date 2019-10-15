@@ -64,10 +64,21 @@ float Expression::CalculateFitness() const
     OutputLogger::IncrementEvaluations();
     return 100 / (AbsoluteMeanError + 1);
 }
-mutex randExpMu;
+
+shared_ptr<vector<shared_ptr<Expression>>> Expression::Collapse(shared_ptr<Expression> self)
+{
+    shared_ptr<vector<shared_ptr<Expression>>> output(new vector<shared_ptr<Expression>>());
+    output->push_back(self);
+    for (int i = 0; i < m_subexpressions.size(); i++)
+    {
+        auto collapsedSubExp = m_subexpressions[i]->Collapse(m_subexpressions[i]);
+        output->insert(output->end(), collapsedSubExp->begin(), collapsedSubExp->end());
+    }
+    return output;
+}
+
 shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant)
 {
-    // lock_guard<mutex> lock(randExpMu); => TODO check that this leads to deadlock
     // prioritize constants
     if (RandomF() > 0.3f)
     {

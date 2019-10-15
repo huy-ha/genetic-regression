@@ -2,7 +2,7 @@
 #define _SOLVER_HPP_
 #include <list>
 #include <memory>
-#include "Reproducer.hpp"
+#include "reproducers/Reproducer.hpp"
 namespace SymbolicRegression
 {
 using namespace std;
