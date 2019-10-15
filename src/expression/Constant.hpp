@@ -18,7 +18,8 @@ public:
     };
     inline virtual std::string ToString() const override
     {
-        return std::to_string(m_k);
+        float threedecimalplaces = float((int)(m_k * 1000 + 0.5f)) / 1000;
+        return std::to_string(threedecimalplaces);
     }
     friend class ConstantMutator;
 

@@ -9,7 +9,7 @@ public:
     inline Divide() : Expression()
     {
         m_subexpressions.push_back(std::shared_ptr<Expression>(Expression::GenerateRandomExpression()));
-        m_subexpressions.push_back(std::shared_ptr<Expression>(Expression::GenerateRandomExpression()));
+        m_subexpressions.push_back(std::shared_ptr<Expression>(Expression::GenerateRandomExpression(false, true)));
         m_func = [&](float x) {
             return m_subexpressions[0]->ToFunction()(x) / m_subexpressions[1]->ToFunction()(x);
         };

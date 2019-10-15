@@ -77,12 +77,12 @@ shared_ptr<vector<shared_ptr<Expression>>> Expression::Collapse(shared_ptr<Expre
     return output;
 }
 
-shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant)
+shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant, bool noZero)
 {
     // prioritize constants
     if (RandomF() > 0.3f)
     {
-        if (RandomF() > 0.5f || noConstant)
+        if ((RandomF() > 0.5f || noConstant) && !noZero)
         {
             return shared_ptr<Expression>(new Variable());
         }
@@ -94,7 +94,7 @@ shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant)
     // consider operators
 
     //trig functions with low probability
-    if (RandomF() > 0.8f)
+    if (RandomF() > 0.8f && !noZero)
     {
         // equal probability of cos and sin
         return RandomF() > 0.5f ? shared_ptr<Expression>(new Cos()) : shared_ptr<Expression>(new Sin());

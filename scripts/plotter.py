@@ -123,6 +123,7 @@ if __name__ == "__main__":
     plt.scatter(x, y, label=eqn)
     x, y, title = import_xy()
     plt.scatter(x, y, label='dataset')
+    plt.legend()
     plt.title(eqn)
     plt.show()
     exit()
