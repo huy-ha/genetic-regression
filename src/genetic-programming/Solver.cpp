@@ -94,8 +94,7 @@ void Solver::Evolve()
     m_population.erase(it, m_population.end());
 
     // Reproduce
-    // auto offspring = m_reproducer->AsyncReproduce(m_population);
-    auto offspring = m_reproducer->Reproduce(m_population);
+    auto offspring = m_reproducer->AsyncReproduce(m_population);
     // Handle Elites
     auto eliteEnd = m_population.begin();
     advance(eliteEnd, m_eliteCount);

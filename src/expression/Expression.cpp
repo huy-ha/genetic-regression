@@ -27,12 +27,10 @@ function<bool(
 
 mutex Expression::randMutex;
 
-Expression::Expression(shared_ptr<Expression> parent)
+Expression::Expression()
 {
-    m_this = shared_ptr<Expression>(this);
     m_func = 0;
     m_order = -1;
-    m_parent = parent;
 }
 
 Expression::Expression(const Expression &other)
@@ -67,9 +65,18 @@ float Expression::CalculateFitness() const
     return 100 / (AbsoluteMeanError + 1);
 }
 
+shared_ptr<Expression> Expression::Initialize(shared_ptr<Expression> self, shared_ptr<Expression> parent)
+{
+    if (parent != nullptr)
+        self->m_parent = parent;
+    for_each(self->m_subexpressions.begin(), self->m_subexpressions.end(), [&](const shared_ptr<Expression> &subexp) {
+        subexp->Initialize(subexp, self);
+    });
+    return self;
+}
+
 shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
 {
-    // TODO
     while (true)
     {
         auto collapsedExp = exp->Collapse(exp);
@@ -83,16 +90,41 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
             });
         if (operators.size() == 0)
             return exp;
+        cout << operators.size() << " operators in " << exp->ToString() << endl;
         // find first operator that has a constants as inputs
         auto it = find_if(operators.begin(), operators.end(), [](auto op) {
-            return all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), [](auto subexpression) {
-                return typeid(subexpression).name() == "class SymbolicRegression::Constant";
+            return all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), [&](auto subexpression) {
+                cout << "\t" << typeid(*op).name() << ":" << typeid(*subexpression).name() << endl;
+                return string(typeid(*subexpression).name()) == string("class SymbolicRegression::Constant");
             });
         });
         // no operator with constants
         if (it == operators.end())
+        {
+            cout << "Found None" << endl;
             return exp;
+        }
+        else
+            cout << "Found one " << typeid(*(*it)).name() << endl;
         // replace this node
+        auto expToSimplify = *it;
+
+        float val = expToSimplify->ToFunction()(0);
+        auto replacementConstant = shared_ptr<Expression>(new Constant(val));
+        //no parent
+        if (!expToSimplify->m_parent)
+        {
+            return replacementConstant;
+        }
+        auto parent = expToSimplify->m_parent;
+        cout << val << endl;
+        for (int i = 0; i < parent->m_subexpressions.size(); i++)
+        {
+            if (string(parent->m_subexpressions[i]->ToString()) == expToSimplify->ToString())
+            {
+                parent->m_subexpressions[i] = replacementConstant;
+            }
+        }
     }
 }
 
@@ -108,45 +140,47 @@ shared_ptr<vector<shared_ptr<Expression>>> Expression::Collapse(shared_ptr<Expre
     return output;
 }
 
-shared_ptr<Expression> Expression::GenerateRandomExpression(shared_ptr<Expression> parent, bool noConstant, bool noZero)
+shared_ptr<Expression> Expression::GenerateRandomExpression(bool noConstant, bool noZero, bool noTrig)
 {
     // prioritize constants
     if (RandomF() > 0.3f)
     {
         if ((RandomF() > 0.5f || noConstant) && !noZero)
         {
-            return shared_ptr<Expression>(new Variable(parent));
+            return Initialize(shared_ptr<Expression>(new Variable()), nullptr);
         }
         else
         {
-            return shared_ptr<Expression>(new Constant(parent));
+            return Initialize(shared_ptr<Expression>(new Constant()), nullptr);
         }
     }
     // consider operators
 
     //trig functions with low probability
-    if (RandomF() > 0.8f && !noZero)
+    if (RandomF() > 0.8f && !noZero && !noTrig)
     {
         // equal probability of cos and sin
-        return RandomF() > 0.5f ? shared_ptr<Expression>(new Cos(parent)) : shared_ptr<Expression>(new Sin(parent));
+        return Initialize(
+            shared_ptr<Expression>(RandomF() > 0.5f ? (Expression *)new Cos() : (Expression *)new Sin()),
+            nullptr);
     }
     float p = RandomF();
     //equal probabilty of binary opertaors
     if (p > (3.0f / 4.0f))
     {
-        return shared_ptr<Expression>(new Plus(parent));
+        return Initialize(shared_ptr<Expression>(new Plus()), nullptr);
     }
     else if (p > (2.0f / 4.0f))
     {
-        return shared_ptr<Expression>(new Minus(parent));
+        return Initialize(shared_ptr<Expression>(new Minus()), nullptr);
     }
     else if (p > (1.0f / 4.0f))
     {
-        return shared_ptr<Expression>(new Multiply(parent));
+        return Initialize(shared_ptr<Expression>(new Multiply()), nullptr);
     }
     else
     {
-        return shared_ptr<Expression>(new Divide(parent));
+        return Initialize(shared_ptr<Expression>(new Divide()), nullptr);
     }
 }
 

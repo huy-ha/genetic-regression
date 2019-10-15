@@ -6,9 +6,9 @@ namespace SymbolicRegression
 class Sin : public Expression
 {
 public:
-    inline Sin(shared_ptr<Expression> parent) : Expression(parent)
+    inline Sin() : Expression()
     {
-        m_subexpressions.push_back(Expression::GenerateRandomExpression(m_this, true, true));
+        m_subexpressions.push_back(Expression::GenerateRandomExpression(true, false, true));
         m_func = [&](float x) {
             return sinf(m_subexpressions[0]->ToFunction()(x));
         };

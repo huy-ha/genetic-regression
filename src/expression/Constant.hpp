@@ -9,13 +9,13 @@ namespace SymbolicRegression
 class Constant : public Expression
 {
 public:
-    inline Constant(shared_ptr<Expression> parent) : Expression(parent)
+    inline Constant() : Expression()
     {
         m_k = SymbolicRegression::Expression::RandomF(-10, 10);
         m_func = [&](float x) { return m_k; };
         m_order = 0;
     }
-    inline Constant(shared_ptr<Expression> parent, float k) : Expression(parent)
+    inline Constant(float k) : Expression()
     {
         m_k = k;
         m_func = [&](float x) { return m_k; };

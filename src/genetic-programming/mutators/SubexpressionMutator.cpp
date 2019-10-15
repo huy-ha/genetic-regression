@@ -21,7 +21,7 @@ shared_ptr<Expression> SubexpressionMutator::Mutate(shared_ptr<Expression> exp)
     i = i % operators.size();
     auto expToChange = operators[i];
     i = int(Expression::RandomF(0, float(expToChange->Order()) - 1.0f));
-    expToChange->m_subexpressions[i] = Expression::GenerateRandomExpression(expToChange);
+    expToChange->m_subexpressions[i] = Expression::GenerateRandomExpression();
     return exp;
 }
 } // namespace SymbolicRegression

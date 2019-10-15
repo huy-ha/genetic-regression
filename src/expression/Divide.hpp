@@ -6,10 +6,10 @@ namespace SymbolicRegression
 class Divide : public Expression
 {
 public:
-    inline Divide(shared_ptr<Expression> parent) : Expression(parent)
+    inline Divide() : Expression()
     {
-        m_subexpressions.push_back(std::shared_ptr<Expression>(Expression::GenerateRandomExpression(m_this)));
-        m_subexpressions.push_back(std::shared_ptr<Expression>(Expression::GenerateRandomExpression(m_this, false, true)));
+        m_subexpressions.push_back(std::shared_ptr<Expression>(Expression::GenerateRandomExpression()));
+        m_subexpressions.push_back(std::shared_ptr<Expression>(Expression::GenerateRandomExpression(false, true)));
         m_func = [&](float x) {
             return m_subexpressions[0]->ToFunction()(x) / m_subexpressions[1]->ToFunction()(x);
         };
