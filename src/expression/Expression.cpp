@@ -13,7 +13,7 @@
 #include <algorithm>
 #include "../engine/OutputLogger.hpp"
 #include <typeinfo>
-#include "../Solver.hpp"
+#include "../genetic-programming/Solver.hpp"
 namespace SymbolicRegression
 {
 using namespace std;
