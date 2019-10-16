@@ -3,6 +3,7 @@
 #include "../../expression/Expression.hpp"
 #include "../mutators/ConstantMutator.hpp"
 #include "../mutators/SubexpressionMutator.hpp"
+#include "../mutators/TruncateMutator.hpp"
 #include <algorithm>
 #include <iostream>
 #include "../../engine/Config.hpp"
@@ -50,9 +51,13 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
             // cout << "Crossed over" << endl;
         }
         child = ConstantMutator::Mutate(child);
-        if (Expression::RandomF() > 0.7f)
+        if (Expression::RandomF() > 0.9999f)
         {
             child = SubexpressionMutator::Mutate(child);
+        }
+        if (Expression::RandomF() > 0.9999f)
+        {
+            child = TruncateMutator::Mutate(child);
         }
         if (Expression::RandomF() < Solver::GetTemp())
         {
