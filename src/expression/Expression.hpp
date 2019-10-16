@@ -65,7 +65,6 @@ protected:
 protected:
     int m_order = -1;                  // How many parameters the current expression needs
     function<float(float)> m_func = 0; //function presenting this expression node's function
-    shared_ptr<Expression> m_parent;
     vector<shared_ptr<Expression>> m_subexpressions;
     float m_fitness = -1;
     int m_level = -1;

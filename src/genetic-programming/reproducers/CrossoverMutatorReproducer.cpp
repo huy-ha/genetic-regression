@@ -54,7 +54,7 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
         {
             child = SubexpressionMutator::Mutate(child);
         }
-        if (Expression::RandomF() > 0.9999f)
+        if (Expression::RandomF() > 0.99995f)
         {
             child = TruncateMutator::Mutate(child);
         }

@@ -69,16 +69,6 @@ float Expression::CalculateFitness() const
     return 100 / (AbsoluteMeanError + 1);
 }
 
-shared_ptr<Expression> Expression::Initialize(shared_ptr<Expression> self, shared_ptr<Expression> parent)
-{
-    if (parent != nullptr)
-        self->m_parent = parent;
-    for_each(self->m_subexpressions.begin(), self->m_subexpressions.end(), [&](const shared_ptr<Expression> &subexp) {
-        subexp->Initialize(subexp, self);
-    });
-    return Simplify(self);
-}
-
 shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
 {
     // int count = 0;
@@ -98,7 +88,8 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
             });
         if (operators.size() == 0)
             return exp;
-        // cout << string("simplifying " + exp->Depth() + string(" : ") + exp->ToString() + " for the " + to_string(count++)) << endl;
+
+        // Replace operators that evaluates to constants
         vector<shared_ptr<Expression>>::iterator it;
         if ((it = find_if(operators.begin(), operators.end(), [](auto op) {
                  return all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), [&](auto subexpression) {
@@ -107,20 +98,20 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
              })) != operators.end())
         {
             // replace this node
-
             float val = (*it)->ToFunction()(0);
-            auto replacementConstant = shared_ptr<Expression>(new Constant((*it)->Level(), val));
+            auto replacementConstant = shared_ptr<Expression>();
             //no parent
-            if (!(*it)->m_parent)
+            if ((*it)->Level() == 1)
             {
-                return replacementConstant;
+                exp.swap(replacementConstant);
+                return exp;
             }
-            auto parent = (*it)->m_parent;
+            (*it).auto parent = (*it)->m_parent;
             for (int i = 0; i < parent->m_subexpressions.size(); i++)
             {
                 if (string(parent->m_subexpressions[i]->ToString()) == (*it)->ToString())
                 {
-                    parent->m_subexpressions[i] = replacementConstant;
+                    parent->m_subexpressions[i].swap(replacementConstant);
                 }
             }
         }
@@ -132,7 +123,7 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
         {
             auto replacementConstant = shared_ptr<Expression>(new Constant((*it)->Level(), RandomF(0.0f, 0.2f)));
             // no parent
-            if (!(*it)->m_parent)
+            if ((*it)->Level() == 1)
             {
                 return replacementConstant;
             }
@@ -191,11 +182,11 @@ shared_ptr<Expression> Expression::GenerateRandomZeroOrderExpression(int level)
 {
     if (RandomF() > 0.5f)
     {
-        return Initialize(shared_ptr<Expression>(new Variable(level)), nullptr);
+        return Simplify(shared_ptr<Expression>(new Variable(level)));
     }
     else
     {
-        return Initialize(shared_ptr<Expression>(new Constant(level)), nullptr);
+        return Simplify(shared_ptr<Expression>(new Constant(level)));
     }
 }
 
@@ -205,19 +196,19 @@ shared_ptr<Expression> Expression::GenerateRandomBinaryOperator(int level)
     //equal probabilty of binary operators
     if (p > (3.0f / 4.0f))
     {
-        return Initialize(shared_ptr<Expression>(new Plus(level)), nullptr);
+        return Simplify(shared_ptr<Expression>(new Plus(level)));
     }
     else if (p > (2.0f / 4.0f))
     {
-        return Initialize(shared_ptr<Expression>(new Minus(level)), nullptr);
+        return Simplify(shared_ptr<Expression>(new Minus(level)));
     }
     else if (p > (1.0f / 4.0f))
     {
-        return Initialize(shared_ptr<Expression>(new Multiply(level)), nullptr);
+        return Simplify(shared_ptr<Expression>(new Multiply(level)));
     }
     else
     {
-        return Initialize(shared_ptr<Expression>(new Divide(level)), nullptr);
+        return Simplify(shared_ptr<Expression>(new Divide(level)));
     }
 }
 
@@ -226,11 +217,11 @@ shared_ptr<Expression> Expression::GenerateRandomTrigExpression(int level)
     // equal probability of cos and sin
     if (RandomF() > 0.5f)
     {
-        return Initialize(shared_ptr<Expression>(new Cos(level)), nullptr);
+        return Simplify(shared_ptr<Expression>(new Cos(level)));
     }
     else
     {
-        return Initialize(shared_ptr<Expression>(new Sin(level)), nullptr);
+        return Simplify(shared_ptr<Expression>(new Sin(level)));
     }
 }
 
