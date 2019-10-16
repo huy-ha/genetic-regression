@@ -10,7 +10,6 @@
 #include "Variable.hpp"
 #include "../engine/Config.hpp"
 #include <functional>
-#include <algorithm>
 #include "../engine/OutputLogger.hpp"
 #include <typeinfo>
 #include "../genetic-programming/Solver.hpp"
@@ -32,7 +31,6 @@ Expression::Expression(int level)
     m_func = 0;
     m_order = -1;
     m_level = level;
-    cout << "Expression::Expression(int level)" << endl;
 }
 
 Expression::Expression(const Expression &other)
@@ -44,7 +42,6 @@ Expression::Expression(const Expression &other)
     {
         m_subexpressions.push_back(Copy(other.m_subexpressions[i]));
     }
-    cout << "Expression::Expression(const Expression &other)" << endl;
 }
 
 float Expression::Fitness()
@@ -81,13 +78,15 @@ shared_ptr<Expression> Expression::Initialize(shared_ptr<Expression> self, share
 
 shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
 {
-    // int count = 0;
     while (true)
     {
         // find all operators
         auto collapsedExp = exp->Collapse(exp);
         if (collapsedExp->size() == 1)
+        {
             return exp;
+        }
+
         vector<shared_ptr<Expression>> operators;
         copy_if(
             collapsedExp->begin(),
@@ -97,51 +96,57 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
                 return e->Order() > 0;
             });
         if (operators.size() == 0)
+        {
             return exp;
-        // cout << string("simplifying " + exp->Depth() + string(" : ") + exp->ToString() + " for the " + to_string(count++)) << endl;
+        }
+
         vector<shared_ptr<Expression>>::iterator it;
-        if ((it = find_if(operators.begin(), operators.end(), [](auto op) {
-                 return all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), [&](auto subexpression) {
-                     return string(typeid(*subexpression).name()) == string("class SymbolicRegression::Constant");
-                 });
+        if ((it = FindFirst(operators, [&](auto subexpression) {
+                 return string(typeid(*subexpression).name()) == string("class SymbolicRegression::Constant");
              })) != operators.end())
         {
-            // replace this node
+            auto expToSimplify = (*it);
 
-            float val = (*it)->ToFunction()(0);
+            // replace this node
+            float val = expToSimplify->ToFunction()(0);
             auto replacementConstant = shared_ptr<Expression>(new Constant((*it)->Level(), val));
             //no parent
-            if (!(*it)->m_parent)
+            if (expToSimplify->Level() == 0)
             {
                 return replacementConstant;
             }
-            auto parent = (*it)->m_parent;
-            for (int i = 0; i < parent->m_subexpressions.size(); i++)
+            else if (!expToSimplify->m_parent.expired())
             {
-                if (string(parent->m_subexpressions[i]->ToString()) == (*it)->ToString())
+                auto parent = expToSimplify->m_parent.lock();
+                for (int i = 0; i < parent->m_subexpressions.size(); i++)
                 {
-                    parent->m_subexpressions[i] = replacementConstant;
+                    if (string(parent->m_subexpressions[i]->ToString()) == expToSimplify->ToString())
+                    {
+                        parent->m_subexpressions[i] = replacementConstant;
+                    }
                 }
             }
         }
-        else if ((it = find_if(operators.begin(), operators.end(), [](auto op) {
-                      return all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), [&](auto subexpression) {
-                          return string(typeid(*subexpression).name()) == string("class SymbolicRegression::Variable");
-                      });
+        else if ((it = FindFirst(operators, [&](auto subexpression) {
+                      return string(typeid(*subexpression).name()) == string("class SymbolicRegression::Variable");
                   })) != operators.end())
         {
-            auto replacementConstant = shared_ptr<Expression>(new Constant((*it)->Level(), RandomF(0.0f, 0.2f)));
+            auto expToSimplify = (*it);
+            auto replacementConstant = shared_ptr<Expression>(new Constant(expToSimplify->Level(), RandomF(0.0f, 0.2f)));
             // no parent
-            if (!(*it)->m_parent)
+            if (expToSimplify->Level() == 0)
             {
                 return replacementConstant;
             }
-            auto parent = (*it)->m_parent;
-            for (int i = 0; i < parent->m_subexpressions.size(); i++)
+            else if (!expToSimplify->m_parent.expired())
             {
-                if (string(parent->m_subexpressions[i]->ToString()) == (*it)->ToString())
+                auto parent = expToSimplify->m_parent.lock();
+                for (int i = 0; i < parent->m_subexpressions.size(); i++)
                 {
-                    parent->m_subexpressions[i] = replacementConstant;
+                    if (string(parent->m_subexpressions[i]->ToString()) == expToSimplify->ToString())
+                    {
+                        parent->m_subexpressions[i] = replacementConstant;
+                    }
                 }
             }
         }
@@ -149,8 +154,46 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
         {
             return exp;
         }
+        exp->RecalculateLevels(0);
     }
 }
+
+// shared_ptr<Expression> Expression::SimplifyOperator(
+//     vector<shared_ptr<Expression>> &operators,
+//     function<bool(const shared_ptr<Expression> &)> predicate,
+//     function<shared_ptr<Expression>(int)> replacementConstructor)
+// {
+//     vector<shared_ptr<Expression>>::iterator it;
+//     if ((it = find_if(operators.begin(), operators.end(), [](auto op) {
+//              return all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), predicate);
+//          })) != operators.end())
+//     {
+//         auto expToSimplify = (*it);
+//         // replace this node
+//         float val = expToSimplify->ToFunction()(0);
+//         auto replacementConstant = shared_ptr<Expression>(new Constant((*it)->Level(), val));
+//         //no parent
+//         if (expToSimplify->Level() == 0)
+//         {
+//             return replacementConstant;
+//         }
+//         if (!expToSimplify->m_parent.expired())
+//         {
+//             auto parent = expToSimplify->m_parent.lock();
+//             for (int i = 0; i < parent->m_subexpressions.size(); i++)
+//             {
+//                 if (string(parent->m_subexpressions[i]->ToString()) == expToSimplify->ToString())
+//                 {
+//                     parent->m_subexpressions[i] = replacementConstant;
+//                 }
+//             }
+//         }
+//         else
+//         {
+//             cout << expToSimplify->Level() << " - parent expired " << expToSimplify->ToString() << " in " << exp->ToString() << endl;
+//         }
+//     }
+// }
 
 bool Expression::IsValid(shared_ptr<Expression> exp)
 {

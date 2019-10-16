@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <algorithm>
 #include <mutex>
 namespace SymbolicRegression
 {
@@ -35,7 +36,7 @@ public:
 
     static float RandomF();
     static float RandomF(float min, float max);
-    virtual string ToString() const = 0;
+    inline virtual string ToString() const = 0;
     static shared_ptr<Expression> Copy(const shared_ptr<Expression> &source);
 
 public:
@@ -55,17 +56,32 @@ public:
 protected:
     Expression(int level);
     Expression(const Expression &other);
-    inline ~Expression()
-    {
-        cout << "~Expression()" << endl;
-    }
     template <typename R, typename... Types>
     inline static int NumArgs(function<R(Types...)> f) { return sizeof...(Types); }
+    inline static vector<shared_ptr<Expression>>::iterator FindFirst(
+        vector<shared_ptr<Expression>> &operators,
+        function<bool(const shared_ptr<Expression> &)> predicate)
+    {
+        return find_if(operators.begin(), operators.end(), [&](auto op) {
+            return all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), predicate);
+        });
+    }
+    inline void RecalculateLevels(int level)
+    {
+        m_level = level;
+        for_each(m_subexpressions.begin(), m_subexpressions.end(), [&](auto subexp) {
+            subexp->RecalculateLevels(level + 1);
+        });
+    }
+    // static shared_ptr<Expression> SimplifyOperator(
+    //     vector<shared_ptr<Expression>> &operators,
+    //     function<bool(const shared_ptr<Expression> &)> predicate,
+    //     function<shared_ptr<Expression>(int)> replacementConstructor);
 
 protected:
     int m_order = -1;                  // How many parameters the current expression needs
     function<float(float)> m_func = 0; //function presenting this expression node's function
-    shared_ptr<Expression> m_parent;
+    weak_ptr<Expression> m_parent;
     vector<shared_ptr<Expression>> m_subexpressions;
     float m_fitness = -1;
     int m_level = -1;
