@@ -123,7 +123,7 @@ def get_dir_name(runNumber):
     #     plt.show()
 
 if __name__ == "__main__":
-    dirname = get_dir_name(17)
+    dirname = get_dir_name(1)
     x, y, filepath, eqn = import_finalbest(dirname + "FinalBest.txt")
     plt.scatter(x, y, label=eqn)
     x, y, title = import_xy('inputs/data.txt')

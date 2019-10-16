@@ -59,7 +59,7 @@ void Solver::InitializePopulation()
     while (m_population.size() < m_populationCount)
     {
         auto newExp = Expression::GenerateRandomExpression(1, true);
-        if (!any_of(m_population.begin(), m_population.end(), [&](const shared_ptr<Expression> &exp) {
+        if (Expression::IsValid(newExp) && !any_of(m_population.begin(), m_population.end(), [&](const shared_ptr<Expression> &exp) {
                 return exp->ToString() == newExp->ToString();
             }))
         {

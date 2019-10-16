@@ -48,6 +48,7 @@ public:
     inline int Order() const { return m_order; }
     inline int Level() const { return m_level; }
     int Depth() const;
+    static bool IsValid(shared_ptr<Expression> exp);
 
 protected:
     Expression(int level);

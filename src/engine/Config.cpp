@@ -36,8 +36,8 @@ Config::Config(string configFilePath, string outputFilePath)
     while (getline(configFile, buf))
         ParseConfigLine(buf);
     configFile.close();
-    // ParseInputDatapoints(m_configs["Input"]);
-    UseTestInputDatapoints();
+    ParseInputDatapoints(m_configs["Input"]);
+    // UseTestInputDatapoints();
 }
 
 void Config::UseTestInputDatapoints()

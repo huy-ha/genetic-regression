@@ -27,7 +27,7 @@ void Reproducer::TryInsertOffspring(shared_ptr<Expression> exp)
     if (m_stop)
         return;
     // insert offspring if it is unique
-    if (m_offsprings.find(exp->ToString()) == m_offsprings.end())
+    if (Expression::IsValid(exp) && m_offsprings.find(exp->ToString()) == m_offsprings.end())
     {
         m_offsprings.insert(make_pair(exp->ToString(), exp));
     }

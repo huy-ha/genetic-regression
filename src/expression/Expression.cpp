@@ -150,6 +150,29 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
     }
 }
 
+bool Expression::IsValid(shared_ptr<Expression> exp)
+{
+    string prefix = "class SymbolicRegression::";
+    auto collapsedSubExp = exp->Collapse(exp);
+    vector<shared_ptr<Expression>> divides;
+    copy_if(
+        collapsedSubExp->begin(),
+        collapsedSubExp->end(),
+        back_inserter(divides),
+        [&](auto e) {
+            return string(typeid(*e).name()) == string(prefix + "Divide");
+        });
+    if (divides.size() == 0)
+        return true;
+    bool valid = !any_of(divides.begin(), divides.end(), [&](const shared_ptr<Expression> &divide) {
+        string typeName = typeid(*(divide->m_subexpressions[1])).name();
+        return typeName == (prefix + "Variable") ||
+               typeName == (prefix + "Sin") ||
+               typeName == (prefix + "Cos");
+    });
+    return valid;
+}
+
 shared_ptr<vector<shared_ptr<Expression>>> Expression::Collapse(shared_ptr<Expression> self)
 {
     shared_ptr<vector<shared_ptr<Expression>>> output(new vector<shared_ptr<Expression>>());
