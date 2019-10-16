@@ -11,7 +11,7 @@ using namespace std::chrono;
 using namespace SymbolicRegression;
 int main(int argc, char **argv)
 {
-    int seed = 0;
+    int seed = int(time(NULL));
     string configFile = "default.config";
     string outputDir;
     if (argc < 2)

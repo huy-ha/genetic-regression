@@ -48,10 +48,9 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
         if (cross1 != nullptr && cross2 != nullptr)
         {
             *cross1 = Expression::Copy(*cross2);
-            // cout << "Crossed over" << endl;
         }
         child = ConstantMutator::Mutate(child);
-        if (Expression::RandomF() > 0.9999f)
+        if (Expression::RandomF() > 0.999f)
         {
             child = SubexpressionMutator::Mutate(child);
         }
@@ -61,7 +60,6 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
         }
         if (Expression::RandomF() < Solver::GetTemp())
         {
-            // cout << "Taking worse solution anyway" << Solver::GetTemp() << endl;
             return child;
         }
         // child needs to be better than one of the parents
