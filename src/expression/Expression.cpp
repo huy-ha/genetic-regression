@@ -45,17 +45,11 @@ Expression::Expression(const Expression &other)
     }
 }
 
-static int saveEval = 0;
 float Expression::Fitness()
 {
     if (m_fitness == -1)
     {
         m_fitness = CalculateFitness();
-    }
-    if (OutputLogger::GetEvaluations() > saveEval * 100000)
-    {
-        Solver::Instance()->SaveOutput();
-        saveEval++;
     }
     return m_fitness;
 }

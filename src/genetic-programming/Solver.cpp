@@ -70,9 +70,15 @@ void Solver::Run()
     int generationCount = Config::GetInt("GenerationCount");
     int saveEval = 0;
     InitializePopulation();
+    cout << "initialized population" << endl;
     for (int i = 0; i < generationCount; i++)
     {
         Evolve();
+        if (OutputLogger::GetEvaluations() > saveEval * 100000)
+        {
+            SaveOutput();
+            saveEval++;
+        }
     }
     SaveOutput();
     m_population.sort(Expression::FitnessComparer);
@@ -82,12 +88,10 @@ void Solver::Run()
 
 void Solver::Evolve()
 {
-
     for_each(m_population.begin(), m_population.end(),
-             [](auto &exp) { exp->Fitness(); });
+             [](const shared_ptr<Expression> &exp) { exp->Fitness(); });
     // Sort in decreasing order of fitness
     m_population.sort(Expression::FitnessComparer);
-
     // Find best in current population
     shared_ptr<Expression> bestExpression = *(m_population.begin());
     if (bestExpression->Fitness() > m_prevHighestFitness)
@@ -95,7 +99,7 @@ void Solver::Evolve()
         m_prevHighestFitness = bestExpression->Fitness();
         cout << "FITNESS " << m_prevHighestFitness
              << " after " << OutputLogger::GetEvaluations() << " evalutions" << endl;
-        // cout << "\t" + bestExpression->ToString() << endl;
+        cout << "\t" + bestExpression->ToString() << endl;
         // cout << "\t"
         //      << "f(0)=" << bestExpression->ToFunction()(0) << endl;
         // cout << "\t"
