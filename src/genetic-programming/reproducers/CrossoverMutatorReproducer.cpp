@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <iostream>
 #include "../../engine/Config.hpp"
+#include "../Solver.hpp"
 namespace SymbolicRegression
 {
 using namespace std;
@@ -53,8 +54,10 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
         {
             child = SubexpressionMutator::Mutate(child);
         }
-
-    } while (child->Fitness() < p1->Fitness() && child->Fitness() < p2->Fitness());
+        // child needs to be better than one of the parents
+    } while (child->Fitness() < p1->Fitness() &&
+             child->Fitness() < p2->Fitness() &&
+             (Expression::RandomF() > Solver::GetTemp()));
     return child;
 }
 

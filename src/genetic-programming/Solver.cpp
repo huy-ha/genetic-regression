@@ -16,10 +16,13 @@ namespace SymbolicRegression
 {
 using namespace std;
 shared_ptr<Solver> Solver::m_instance;
+float Solver::m_temperature;
+mutex Solver::tempMutex;
 Solver::Solver()
 {
     m_populationCount = Config::GetInt("PopulationCount");
     m_eliteCount = Config::GetInt("ElitesCount");
+    m_temperature = Config::GetFloat("Init_T");
     string reproducerConfig = Config::GetString("Reproducer");
     if (reproducerConfig == "CrossoverMutator")
     {
@@ -70,9 +73,12 @@ void Solver::Run()
     int generationCount = Config::GetInt("GenerationCount");
     int saveEval = 0;
     InitializePopulation();
+    cout << "init pop" << endl;
     for (int i = 0; i < generationCount; i++)
     {
+        cout << "gen " << i << endl;
         Evolve();
+        DecayTemp();
     }
     SaveOutput();
     m_population.sort(Expression::FitnessComparer);
@@ -82,7 +88,6 @@ void Solver::Run()
 
 void Solver::Evolve()
 {
-
     for_each(m_population.begin(), m_population.end(),
              [](auto &exp) { exp->Fitness(); });
     // Sort in decreasing order of fitness
@@ -108,8 +113,10 @@ void Solver::Evolve()
     advance(it, m_population.size() * 0.5f);
     m_population.erase(it, m_population.end());
 
+    cout << "reproducing" << endl;
     // Reproduce
     auto offspring = m_reproducer->AsyncReproduce(m_population);
+    cout << "done" << endl;
     // Handle Elites
     auto eliteEnd = m_population.begin();
     advance(eliteEnd, m_eliteCount);
@@ -173,5 +180,17 @@ void Solver::SaveOutput()
         // Failed for some other reason
         cout << "Failed to create output directory" << endl;
     }
+}
+
+float Solver::GetTemp()
+{
+    lock_guard<mutex> lock(tempMutex);
+    return m_temperature;
+}
+
+void Solver::DecayTemp()
+{
+    lock_guard<mutex> lock(tempMutex);
+    m_temperature *= Config::GetFloat("T_decay");
 }
 } // namespace SymbolicRegression

@@ -2,6 +2,7 @@
 #define _SOLVER_HPP_
 #include <list>
 #include <memory>
+#include <mutex>
 #include "reproducers/Reproducer.hpp"
 namespace SymbolicRegression
 {
@@ -13,6 +14,8 @@ public:
     void Run();
     void SaveOutput();
     static shared_ptr<Solver> Instance();
+    static float GetTemp();
+    static void DecayTemp();
 
 protected:
     void InitializePopulation();
@@ -26,6 +29,8 @@ private:
     int m_eliteCount = -1;
     float m_prevHighestFitness = -1;
     static shared_ptr<Solver> m_instance;
+    static float m_temperature;
+    static mutex tempMutex;
 };
 } // namespace SymbolicRegression
 #endif

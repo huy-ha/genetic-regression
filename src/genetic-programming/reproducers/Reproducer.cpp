@@ -12,9 +12,7 @@ mutex mu;
 Reproducer::Reproducer(int populationCount)
 {
     m_populationCount = populationCount;
-    cout << "getting min threads" << endl;
     m_minThreads = Config::GetInt("MinThreads");
-    cout << "getting max threads" << endl;
     m_maxThreads = Config::GetInt("MaxThreads");
 }
 
