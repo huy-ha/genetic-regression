@@ -26,6 +26,7 @@ private:
     void ParseConfigLine(string configLine);
     static bool IsValidKey(string key);
     void ParseInputDatapoints(string inputFilePath);
+    void UseTestInputDatapoints();
 
 protected:
     map<string, string> m_configs;

@@ -36,7 +36,22 @@ Config::Config(string configFilePath, string outputFilePath)
     while (getline(configFile, buf))
         ParseConfigLine(buf);
     configFile.close();
-    ParseInputDatapoints(m_configs["Input"]);
+    // ParseInputDatapoints(m_configs["Input"]);
+    UseTestInputDatapoints();
+}
+
+void Config::UseTestInputDatapoints()
+{
+    auto f1 = [](float x) {
+        return x;
+    };
+    auto f2 = [](float x) {
+        return cosf(x) * 1.5f;
+    };
+    for (float i = 0; i < 10.0f; i += 0.01f)
+    {
+        Data->push_back(tuple<float, float>(i, f2(i)));
+    }
 }
 
 void Config::ParseInputDatapoints(string inputFilePath)
