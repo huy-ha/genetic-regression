@@ -11,6 +11,14 @@ using namespace std::chrono;
 using namespace SymbolicRegression;
 int main(int argc, char **argv)
 {
+    cout << "enterring" << endl;
+    {
+        auto exp1 = Expression::GenerateRandomExpression(0);
+        cout << exp1->ToString() << endl;
+    }
+    cout << "exited " << endl;
+    return 0;
+
     int seed = int(time(NULL));
     string configFile = "default.config";
     string outputDir;

@@ -32,6 +32,7 @@ Expression::Expression(int level)
     m_func = 0;
     m_order = -1;
     m_level = level;
+    cout << "Expression::Expression(int level)" << endl;
 }
 
 Expression::Expression(const Expression &other)
@@ -43,6 +44,7 @@ Expression::Expression(const Expression &other)
     {
         m_subexpressions.push_back(Copy(other.m_subexpressions[i]));
     }
+    cout << "Expression::Expression(const Expression &other)" << endl;
 }
 
 float Expression::Fitness()
@@ -219,6 +221,19 @@ shared_ptr<Expression> Expression::GenerateRandomBinaryOperator(int level)
     }
 }
 
+shared_ptr<Expression> Expression::GenerateRandomTrigExpression(int level)
+{
+    // equal probability of cos and sin
+    if (RandomF() > 0.5f)
+    {
+        return Initialize(shared_ptr<Expression>(new Cos(level)), nullptr);
+    }
+    else
+    {
+        return Initialize(shared_ptr<Expression>(new Sin(level)), nullptr);
+    }
+}
+
 shared_ptr<Expression> Expression::GenerateRandomExpression(int level, bool noConstant, bool noZero, bool noTrig)
 {
     // prioritize constants
@@ -226,15 +241,10 @@ shared_ptr<Expression> Expression::GenerateRandomExpression(int level, bool noCo
     {
         return GenerateRandomZeroOrderExpression(level);
     }
-    // consider operators
-
     //trig functions with low probability
     if (RandomF() > 0.8f && !noZero && !noTrig)
     {
-        // equal probability of cos and sin
-        return Initialize(
-            shared_ptr<Expression>(RandomF() > 0.5f ? (Expression *)new Cos(level) : (Expression *)new Sin(level)),
-            nullptr);
+        GenerateRandomTrigExpression(level);
     }
     return GenerateRandomBinaryOperator(level);
 }

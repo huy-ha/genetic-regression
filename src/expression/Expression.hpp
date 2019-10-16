@@ -15,6 +15,7 @@ public:
     // Factory Functions
     shared_ptr<Expression> static GenerateRandomExpression(int level, bool noConstant = false, bool noZero = false, bool noTrig = false);
     shared_ptr<Expression> static GenerateRandomZeroOrderExpression(int level);
+    shared_ptr<Expression> static GenerateRandomTrigExpression(int level);
     shared_ptr<Expression> static GenerateRandomBinaryOperator(int level);
 
     friend class SubexpressionMutator;
@@ -54,6 +55,10 @@ public:
 protected:
     Expression(int level);
     Expression(const Expression &other);
+    inline ~Expression()
+    {
+        cout << "~Expression()" << endl;
+    }
     template <typename R, typename... Types>
     inline static int NumArgs(function<R(Types...)> f) { return sizeof...(Types); }
 

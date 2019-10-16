@@ -45,7 +45,8 @@ shared_ptr<list<shared_ptr<Expression>>> Reproducer::AsyncReproduce(const list<s
     while (!m_stop)
     {
         size_t n = max(m_populationCount - (int)m_offsprings.size(), m_minThreads);
-        n = min(int(n), m_maxThreads);
+        if (m_maxThreads > 0)
+            n = min(int(n), m_maxThreads);
         vector<future<void>> tasks;
         tasks.reserve(n);
         while (tasks.size() < tasks.capacity())

@@ -18,7 +18,7 @@ Config::Config(string configFilePath, string outputFilePath)
     m_configs.insert(make_pair("Reproducer", "CrossoverMutator"));
     m_configs.insert(make_pair("MinThreads", "20"));
     m_configs.insert(make_pair("MaxThreads", "-1"));
-    m_configs.insert(make_pair("MaxDepth", "8"));
+    m_configs.insert(make_pair("MaxDepth", "5"));
 
     m_configs.insert(make_pair("Init_T", "0.5"));
     m_configs.insert(make_pair("T_decay", "0.999999"));
