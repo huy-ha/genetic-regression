@@ -58,7 +58,7 @@ void Solver::InitializePopulation()
 {
     while (m_population.size() < m_populationCount)
     {
-        auto newExp = Expression::GenerateRandomExpression(1, true);
+        auto newExp = Expression::GenerateRandomExpression(0, true);
         if (Expression::IsValid(newExp) && !any_of(m_population.begin(), m_population.end(), [&](const shared_ptr<Expression> &exp) {
                 return exp->ToString() == newExp->ToString();
             }))
@@ -75,6 +75,7 @@ void Solver::Run()
     InitializePopulation();
     for (int i = 0; i < generationCount; i++)
     {
+        PrintPopulation();
         Evolve();
         DecayTemp();
         if (OutputLogger::GetEvaluations() > saveEval * 100000)
@@ -83,6 +84,7 @@ void Solver::Run()
             saveEval++;
         }
     }
+    PrintPopulation();
     SaveOutput();
     m_population.sort(Expression::FitnessComparer);
     auto finalBest = *m_population.begin();
@@ -115,7 +117,8 @@ void Solver::Evolve()
     advance(it, m_population.size() * 0.5f);
     m_population.erase(it, m_population.end());
     // Reproduce
-    auto offspring = m_reproducer->AsyncReproduce(m_population);
+    // auto offspring = m_reproducer->AsyncReproduce(m_population);
+    auto offspring = m_reproducer->Reproduce(m_population);
     // Handle Elites
     auto eliteEnd = m_population.begin();
     advance(eliteEnd, m_eliteCount);

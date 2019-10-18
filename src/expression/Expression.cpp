@@ -16,6 +16,8 @@
 namespace SymbolicRegression
 {
 using namespace std;
+
+#pragma region Static Variables
 function<bool(
     const shared_ptr<Expression> &,
     const shared_ptr<Expression> &)>
@@ -24,7 +26,34 @@ function<bool(
     return a->Fitness() > b->Fitness();
 };
 
+Expression::ExpressionPredicate Expression::evaluatesToConstant = [](auto subexpression) {
+    auto f = subexpression->ToFunction();
+    float f0 = f(0);
+    float f1 = f(1);
+    float f2 = f(2);
+    if (f0 == f1 && f2 == f1)
+        return true;
+    else
+        return false;
+};
+
+Expression::ExpressionPredicate Expression::subexpressionsCancelOut = [](auto subexpression) {
+    return string(typeid(*subexpression).name()) ==
+           string("class SymbolicRegression::Variable");
+};
+
+Expression::ExpressionPredicate Expression::all = [](auto op) {
+    return true;
+};
+
+Expression::ExpressionPredicate Expression::minusOrDivide = [&](auto op) {
+    auto typeStr = string(typeid(*op).name());
+    return typeStr == string("class SymbolicRegression::Divide") ||
+           typeStr == string("class SymbolicRegression::Minus");
+};
+
 mutex Expression::randMutex;
+#pragma endregion
 
 Expression::Expression(int level)
 {
@@ -73,63 +102,34 @@ shared_ptr<Expression> Expression::Initialize(shared_ptr<Expression> self, share
     for_each(self->m_subexpressions.begin(), self->m_subexpressions.end(), [&](const shared_ptr<Expression> &subexp) {
         subexp->Initialize(subexp, self);
     });
-    return Simplify(self);
+    return self;
 }
 
 shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
 {
+    if (exp->Depth() == 1)
+    {
+        return exp;
+    }
     while (true)
     {
-        // find all operators
+        exp = Initialize(exp, nullptr);
+        exp->RecalculateLevels(0);
+
+        // 1. find all operators
         auto collapsedExp = exp->Collapse(exp);
         if (collapsedExp->size() == 1)
-        {
             return exp;
-        }
 
         vector<shared_ptr<Expression>> operators;
-        copy_if(
-            collapsedExp->begin(),
-            collapsedExp->end(),
-            back_inserter(operators),
-            [](auto e) {
-                return e->Order() > 0;
-            });
+        copy_if(collapsedExp->begin(), collapsedExp->end(), back_inserter(operators),
+                [](auto e) { return e->Order() > 0; });
         if (operators.size() == 0)
-        {
             return exp;
-        }
 
+        // 2. check for expressions that cancels out the variables
         vector<shared_ptr<Expression>>::iterator it;
-        if ((it = FindFirst(operators, [&](auto subexpression) {
-                 return string(typeid(*subexpression).name()) == string("class SymbolicRegression::Constant");
-             })) != operators.end())
-        {
-            auto expToSimplify = (*it);
-
-            // replace this node
-            float val = expToSimplify->ToFunction()(0);
-            auto replacementConstant = shared_ptr<Expression>(new Constant((*it)->Level(), val));
-            //no parent
-            if (expToSimplify->Level() == 0)
-            {
-                return replacementConstant;
-            }
-            else if (!expToSimplify->m_parent.expired())
-            {
-                auto parent = expToSimplify->m_parent.lock();
-                for (int i = 0; i < parent->m_subexpressions.size(); i++)
-                {
-                    if (string(parent->m_subexpressions[i]->ToString()) == expToSimplify->ToString())
-                    {
-                        parent->m_subexpressions[i] = replacementConstant;
-                    }
-                }
-            }
-        }
-        else if ((it = FindFirst(operators, [&](auto subexpression) {
-                      return string(typeid(*subexpression).name()) == string("class SymbolicRegression::Variable");
-                  })) != operators.end())
+        if ((it = FindFirst(operators, subexpressionsCancelOut, minusOrDivide)) != operators.end())
         {
             auto expToSimplify = (*it);
             auto replacementConstant = shared_ptr<Expression>(new Constant(expToSimplify->Level(), RandomF(0.0f, 0.2f)));
@@ -138,62 +138,39 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
             {
                 return replacementConstant;
             }
-            else if (!expToSimplify->m_parent.expired())
+            else
             {
-                auto parent = expToSimplify->m_parent.lock();
-                for (int i = 0; i < parent->m_subexpressions.size(); i++)
-                {
-                    if (string(parent->m_subexpressions[i]->ToString()) == expToSimplify->ToString())
-                    {
-                        parent->m_subexpressions[i] = replacementConstant;
-                    }
-                }
+                ReplaceExpression(expToSimplify, replacementConstant);
             }
         }
+        // 3. check for expressions that evaluates to constants
+        else if ((it = FindFirst(operators, all, evaluatesToConstant)) != operators.end())
+        {
+            auto expToSimplify = (*it);
+
+            // replace with constant at same level and of the same size
+            auto replacementConstant = shared_ptr<Expression>(
+                new Constant(
+                    (*it)->Level(),
+                    expToSimplify->ToFunction()(0)));
+            //no parent
+            if (expToSimplify->Level() == 0)
+            {
+
+                return replacementConstant;
+            }
+            else
+            {
+                ReplaceExpression(expToSimplify, replacementConstant);
+            }
+        }
+
         else
         {
             return exp;
         }
-        exp->RecalculateLevels(0);
     }
 }
-
-// shared_ptr<Expression> Expression::SimplifyOperator(
-//     vector<shared_ptr<Expression>> &operators,
-//     function<bool(const shared_ptr<Expression> &)> predicate,
-//     function<shared_ptr<Expression>(int)> replacementConstructor)
-// {
-//     vector<shared_ptr<Expression>>::iterator it;
-//     if ((it = find_if(operators.begin(), operators.end(), [](auto op) {
-//              return all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), predicate);
-//          })) != operators.end())
-//     {
-//         auto expToSimplify = (*it);
-//         // replace this node
-//         float val = expToSimplify->ToFunction()(0);
-//         auto replacementConstant = shared_ptr<Expression>(new Constant((*it)->Level(), val));
-//         //no parent
-//         if (expToSimplify->Level() == 0)
-//         {
-//             return replacementConstant;
-//         }
-//         if (!expToSimplify->m_parent.expired())
-//         {
-//             auto parent = expToSimplify->m_parent.lock();
-//             for (int i = 0; i < parent->m_subexpressions.size(); i++)
-//             {
-//                 if (string(parent->m_subexpressions[i]->ToString()) == expToSimplify->ToString())
-//                 {
-//                     parent->m_subexpressions[i] = replacementConstant;
-//                 }
-//             }
-//         }
-//         else
-//         {
-//             cout << expToSimplify->Level() << " - parent expired " << expToSimplify->ToString() << " in " << exp->ToString() << endl;
-//         }
-//     }
-// }
 
 bool Expression::IsValid(shared_ptr<Expression> exp)
 {
@@ -234,11 +211,11 @@ shared_ptr<Expression> Expression::GenerateRandomZeroOrderExpression(int level)
 {
     if (RandomF() > 0.5f)
     {
-        return Initialize(shared_ptr<Expression>(new Variable(level)), nullptr);
+        return shared_ptr<Expression>(new Variable(level));
     }
     else
     {
-        return Initialize(shared_ptr<Expression>(new Constant(level)), nullptr);
+        return shared_ptr<Expression>(new Constant(level));
     }
 }
 
@@ -248,19 +225,19 @@ shared_ptr<Expression> Expression::GenerateRandomBinaryOperator(int level)
     //equal probabilty of binary operators
     if (p > (3.0f / 4.0f))
     {
-        return Initialize(shared_ptr<Expression>(new Plus(level)), nullptr);
+        return shared_ptr<Expression>(new Plus(level));
     }
     else if (p > (2.0f / 4.0f))
     {
-        return Initialize(shared_ptr<Expression>(new Minus(level)), nullptr);
+        return shared_ptr<Expression>(new Minus(level));
     }
     else if (p > (1.0f / 4.0f))
     {
-        return Initialize(shared_ptr<Expression>(new Multiply(level)), nullptr);
+        return shared_ptr<Expression>(new Multiply(level));
     }
     else
     {
-        return Initialize(shared_ptr<Expression>(new Divide(level)), nullptr);
+        return shared_ptr<Expression>(new Divide(level));
     }
 }
 
@@ -269,27 +246,33 @@ shared_ptr<Expression> Expression::GenerateRandomTrigExpression(int level)
     // equal probability of cos and sin
     if (RandomF() > 0.5f)
     {
-        return Initialize(shared_ptr<Expression>(new Cos(level)), nullptr);
+        return shared_ptr<Expression>(new Cos(level));
     }
     else
     {
-        return Initialize(shared_ptr<Expression>(new Sin(level)), nullptr);
+        return shared_ptr<Expression>(new Sin(level));
     }
 }
 
 shared_ptr<Expression> Expression::GenerateRandomExpression(int level, bool noConstant, bool noZero, bool noTrig)
 {
-    // prioritize constants
-    if (RandomF() > 0.5f || level >= Config::GetInt("MaxDepth") - 1)
+    shared_ptr<Expression> exp;
+
+    if ((RandomF() > 0.5f || level >= Config::GetInt("MaxDepth") - 1) && level > 0)
     {
-        return GenerateRandomZeroOrderExpression(level);
+        // prioritize constants
+        exp = GenerateRandomZeroOrderExpression(level);
     }
-    //trig functions with low probability
-    if (RandomF() > 0.8f && !noZero && !noTrig)
+    else if (RandomF() > 0.8f && !noZero && !noTrig)
     {
-        GenerateRandomTrigExpression(level);
+        //trig functions with low probability
+        exp = GenerateRandomTrigExpression(level);
     }
-    return GenerateRandomBinaryOperator(level);
+    else
+    {
+        exp = GenerateRandomBinaryOperator(level);
+    }
+    return Simplify(exp);
 }
 
 #define pointer_cast(T, U, p) shared_ptr<T>(new U(*dynamic_pointer_cast<U>(p)));

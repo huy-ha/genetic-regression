@@ -31,10 +31,10 @@ shared_ptr<Expression> *CrossoverMutatorReproducer::FindCrossoverPoint(shared_pt
 
 shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_ptr<Expression> p1, const shared_ptr<Expression> p2)
 {
-    // TODO mutate child
     shared_ptr<Expression> child;
     do
     {
+        // cout << "creating child from " << p1->ToString() << " and " << p2->ToString() << endl;
         child = Expression::Copy(p1);
         // Not tall enough to crossover
         if (child->Depth() == 1 || p2->Depth() == 1)

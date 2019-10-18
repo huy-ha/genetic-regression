@@ -53,19 +53,52 @@ public:
     int Depth() const;
     static bool IsValid(shared_ptr<Expression> exp);
 
+public:
+    /*
+        EXPRESSION PREDICATES TO HELP WITH EXPRESSION SIMPLIFICATION
+    */
+    typedef function<bool(const shared_ptr<Expression> &)> ExpressionPredicate;
+    static ExpressionPredicate evaluatesToConstant;
+    static ExpressionPredicate subexpressionsCancelOut;
+    static ExpressionPredicate all;
+    static ExpressionPredicate minusOrDivide;
+
 protected:
     Expression(int level);
     Expression(const Expression &other);
-    template <typename R, typename... Types>
-    inline static int NumArgs(function<R(Types...)> f) { return sizeof...(Types); }
+
     inline static vector<shared_ptr<Expression>>::iterator FindFirst(
         vector<shared_ptr<Expression>> &operators,
-        function<bool(const shared_ptr<Expression> &)> predicate)
+        ExpressionPredicate subexpPredicate,
+        ExpressionPredicate opPredicate)
     {
         return find_if(operators.begin(), operators.end(), [&](auto op) {
-            return all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), predicate);
+            return opPredicate(op) && all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), subexpPredicate);
         });
     }
+
+    // replaces e1 with e2 in e1's original expression tree
+
+    inline static void ReplaceExpression(shared_ptr<Expression> e1, shared_ptr<Expression> e2)
+    {
+        if (!e1->m_parent.expired())
+        {
+            auto parent = e1->m_parent.lock();
+            for (int i = 0; i < parent->m_subexpressions.size(); i++)
+            {
+                if (parent->m_subexpressions[i]->ToString() == e1->ToString())
+                {
+                    parent->m_subexpressions[i] = e2;
+                }
+            }
+        }
+        else
+        {
+            cout << "\nPARENT EXPIRED" << e1->ToString() << endl
+                 << endl;
+        }
+    }
+
     inline void RecalculateLevels(int level)
     {
         m_level = level;
@@ -73,10 +106,6 @@ protected:
             subexp->RecalculateLevels(level + 1);
         });
     }
-    // static shared_ptr<Expression> SimplifyOperator(
-    //     vector<shared_ptr<Expression>> &operators,
-    //     function<bool(const shared_ptr<Expression> &)> predicate,
-    //     function<shared_ptr<Expression>(int)> replacementConstructor);
 
 protected:
     int m_order = -1;                  // How many parameters the current expression needs

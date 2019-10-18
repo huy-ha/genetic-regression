@@ -4,6 +4,7 @@
 #include <list>
 #include <map>
 #include <string>
+#include <tuple>
 #include "../../expression/Expression.hpp"
 namespace SymbolicRegression
 {
@@ -20,6 +21,9 @@ protected:
     map<string, shared_ptr<Expression>> m_offsprings;
     void TryInsertOffspring(shared_ptr<Expression> exp);
     virtual shared_ptr<Expression> CreateOffspring(const shared_ptr<Expression> p1, const shared_ptr<Expression> p2) = 0;
+
+private:
+    tuple<shared_ptr<Expression>, shared_ptr<Expression>> ChooseTwoParents(const list<shared_ptr<Expression>> &parents);
 
 private:
     bool m_stop;

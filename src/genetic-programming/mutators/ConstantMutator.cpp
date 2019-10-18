@@ -23,7 +23,7 @@ shared_ptr<Expression> ConstantMutator::Mutate(shared_ptr<Expression> exp)
         return exp;
     i = i % constants.size();
     auto constantToMutate = dynamic_pointer_cast<Constant>(constants[i]);
-    constantToMutate->m_k = constantToMutate->m_k + Expression::RandomF() * 0.1f;
+    constantToMutate->m_k = constantToMutate->m_k + Expression::RandomF() * 0.3f;
     return exp;
 }
 } // namespace SymbolicRegression
