@@ -75,7 +75,6 @@ void Solver::Run()
     InitializePopulation();
     for (int i = 0; i < generationCount; i++)
     {
-        PrintPopulation();
         Evolve();
         DecayTemp();
         if (OutputLogger::GetEvaluations() > saveEval * 100000)
@@ -84,11 +83,12 @@ void Solver::Run()
             saveEval++;
         }
     }
-    PrintPopulation();
     SaveOutput();
     m_population.sort(Expression::FitnessComparer);
     auto finalBest = *m_population.begin();
-    cout << finalBest->ToString() << endl;
+    cout << "FITNESS " << m_prevHighestFitness
+         << " after " << OutputLogger::GetEvaluations() << " evalutions at temp " << GetTemp() << endl;
+    cout << "\t" + finalBest->ToString() << endl;
 }
 
 void Solver::Evolve()
@@ -105,12 +105,6 @@ void Solver::Evolve()
         cout << "FITNESS " << m_prevHighestFitness
              << " after " << OutputLogger::GetEvaluations() << " evalutions at temp " << GetTemp() << endl;
         cout << "\t" + bestExpression->ToString() << endl;
-        // cout << "\t"
-        //      << "f(0)=" << bestExpression->ToFunction()(0) << endl;
-        // cout << "\t"
-        //      << "f(1)=" << bestExpression->ToFunction()(1) << endl;
-        // cout << "\t"
-        //      << "f(2)=" << bestExpression->ToFunction()(2) << endl;
     }
     // Selection
     auto it = m_population.begin();
@@ -119,6 +113,7 @@ void Solver::Evolve()
     // Reproduce
     // auto offspring = m_reproducer->AsyncReproduce(m_population);
     auto offspring = m_reproducer->Reproduce(m_population);
+
     // Handle Elites
     auto eliteEnd = m_population.begin();
     advance(eliteEnd, m_eliteCount);

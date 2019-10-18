@@ -50,11 +50,11 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
             *cross1 = Expression::Copy(*cross2);
         }
         child = ConstantMutator::Mutate(child);
-        if (Expression::RandomF() > 0.999f)
+        if (Expression::RandomF() > 0.95f)
         {
             child = SubexpressionMutator::Mutate(child);
         }
-        if (Expression::RandomF() > 0.9999f)
+        if (Expression::RandomF() > 0.999f)
         {
             child = TruncateMutator::Mutate(child);
         }

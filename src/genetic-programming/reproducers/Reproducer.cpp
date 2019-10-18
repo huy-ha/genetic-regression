@@ -91,7 +91,6 @@ shared_ptr<list<shared_ptr<Expression>>> Reproducer::AsyncReproduce(const list<s
 
 shared_ptr<list<shared_ptr<Expression>>> Reproducer::Reproduce(const list<shared_ptr<Expression>> &parents)
 {
-    cout << "Reproducing .. " << endl;
     m_offsprings.clear();
     int parentCount = int(parents.size());
     while (m_offsprings.size() < m_populationCount)
@@ -100,12 +99,7 @@ shared_ptr<list<shared_ptr<Expression>>> Reproducer::Reproduce(const list<shared
         auto offspring = CreateOffspring(get<0>(pair), get<1>(pair));
         if (m_offsprings.find(offspring->ToString()) == m_offsprings.end())
         {
-            cout << "Taking " << offspring->ToString() << endl;
             m_offsprings.insert(make_pair(offspring->ToString(), offspring));
-        }
-        else
-        {
-            cout << "Rejecting " << offspring->ToString() << endl;
         }
     }
 
@@ -113,7 +107,6 @@ shared_ptr<list<shared_ptr<Expression>>> Reproducer::Reproduce(const list<shared
     transform(m_offsprings.begin(), m_offsprings.end(), output->begin(), [](auto p) {
         return p.second;
     });
-    cout << "Done Reproducing" << endl;
     return output;
 }
 } // namespace SymbolicRegression
