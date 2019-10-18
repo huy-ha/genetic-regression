@@ -35,7 +35,8 @@ shared_ptr<Expression> ConstantMultiplierMutator::Mutate(shared_ptr<Expression> 
         }
 
         k = Expression::RandomF(-2, 2);
-        if (exp->Fitness(k) > prevFitness)
+        auto f = [=](float x) { return k; };
+        if (exp->Fitness(f) > prevFitness)
         {
             // If expression already has multiply expression in top level
             // and constant in second level

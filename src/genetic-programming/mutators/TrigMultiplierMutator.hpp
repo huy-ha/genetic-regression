@@ -1,11 +1,11 @@
-#ifndef _CONSTANT_MULTIPLIER_MUTATOR_HPP_
-#define _CONSTANT_MULTIPLIER_MUTATOR_HPP_
+#ifndef _TRIG_MULTIPLIER_MUTATOR_HPP_
+#define _TRIG_MULTIPLIER_MUTATOR_HPP_
 #include <memory>
 #include "../../expression/Expression.hpp"
 namespace SymbolicRegression
 {
 using namespace std;
-class ConstantMultiplierMutator
+class TrigMultiplierMutator
 {
 public:
     static shared_ptr<Expression> Mutate(shared_ptr<Expression> exp);

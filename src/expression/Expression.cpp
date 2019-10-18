@@ -57,6 +57,7 @@ Expression::ExpressionPredicate Expression::isTrigFunction = [&](auto op) {
            typeStr == SIN_T;
 };
 
+function<float(float)> Expression::one = [](float x) { return 1.0f; };
 mutex Expression::randMutex;
 #pragma endregion
 
@@ -82,23 +83,23 @@ float Expression::Fitness()
 {
     if (m_fitness == -1)
     {
-        m_fitness = CalculateFitness(1);
+        m_fitness = Fitness(one);
     }
     return m_fitness;
 }
 
-float Expression::Fitness(float k)
+float Expression::Fitness(function<float(float)> f)
 {
-    return CalculateFitness(k);
+    return CalculateFitness(f);
 }
 
-float Expression::CalculateFitness(float k) const
+float Expression::CalculateFitness(function<float(float)> f2) const
 {
     using namespace std;
     function<float(float)> f = ToFunction();
     float AbsoluteErrorSum = 0;
-    for_each(Config::Data->begin(), Config::Data->end(), [&](tuple<float, float> datapoint) {
-        AbsoluteErrorSum += abs(f(get<0>(datapoint)) * k - get<1>(datapoint));
+    for_each(Config::Data->begin(), Config::Data->end(), [&](tuple<float, float> x) {
+        AbsoluteErrorSum += abs(f(get<0>(x)) * f2(get<0>(x)) - get<1>(x));
     });
     float AbsoluteMeanError = AbsoluteErrorSum / Config::Data->size();
     OutputLogger::IncrementEvaluations();

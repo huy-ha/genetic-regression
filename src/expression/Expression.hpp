@@ -23,6 +23,7 @@ public:
     friend class SubexpressionMutator;
     friend class TruncateMutator;
     friend class ConstantMultiplierMutator;
+    friend class TrigMultiplierMutator;
     friend class CrossoverMutatorReproducer;
 
 public:
@@ -48,8 +49,8 @@ public:
     virtual function<float(float)> ToFunction() const;
 
     float Fitness();
-    float Fitness(float k);
-    float CalculateFitness(float k = 1) const;
+    float Fitness(function<float(float)> f);
+    float CalculateFitness(function<float(float)> f) const;
 
     inline int Order() const { return m_order; }
     inline int Level() const { return m_level; }
@@ -66,6 +67,7 @@ public:
     static ExpressionPredicate all;
     static ExpressionPredicate isTrigFunction;
     static ExpressionPredicate minusOrDivide;
+    static function<float(float)> one;
 #define EXPRESSION_TYPE(exp) string(typeid(*exp).name())
 #define CONSTANT_T string("class SymbolicRegression::Constant")
 #define VARIABLE_T string("class SymbolicRegression::Variable")

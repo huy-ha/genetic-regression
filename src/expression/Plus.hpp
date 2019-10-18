@@ -24,6 +24,18 @@ public:
         };
         m_order = 2;
     }
+
+    inline Plus(int level, shared_ptr<Expression> e1, shared_ptr<Expression> e2) : Expression(level)
+    {
+        m_subexpressions.push_back(e1);
+        m_subexpressions.push_back(e2);
+
+        m_func = [&](float x) {
+            return m_subexpressions[0]->ToFunction()(x) + m_subexpressions[1]->ToFunction()(x);
+        };
+        m_order = 2;
+    }
+
     inline Plus(const Plus &other) : Expression(other)
     {
         m_func = [&](float x) {

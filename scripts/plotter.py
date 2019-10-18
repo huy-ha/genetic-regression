@@ -134,8 +134,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     dirname = "runs/tmp/"
     if args.runs != None:
-        print("Runs supplied")
-        dirname = get_dir_name(2)
+        print("Runs supplied:{}".format(args.runs))
+        dirname = get_dir_name(args.runs[0][0])
 
     x, y, filepath, eqn = import_finalbest(dirname + "FinalBest.txt")
     plt.scatter(x, y, label=eqn)

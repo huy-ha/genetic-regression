@@ -35,12 +35,10 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
     shared_ptr<Expression> child;
     do
     {
-        // cout << "creating child from " << p1->ToString() << " and " << p2->ToString() << endl;
         child = Expression::Copy(p1);
         // Not tall enough to crossover
         if (child->Depth() == 1 || p2->Depth() == 1)
         {
-            // cout << "\tDone:" << child->ToString() << endl;
             return child;
         }
 
@@ -53,24 +51,21 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
         }
         child = ConstantMutator::Mutate(child);
         child = ConstantMultiplierMutator::Mutate(child);
-        if (Expression::RandomF() > 0.8f)
+        if (Expression::RandomF() > 0.99f)
         {
             child = SubexpressionMutator::Mutate(child);
         }
-        // if (Expression::RandomF() > 0.999f)
-        if (Expression::RandomF() > 0.9f)
+        if (Expression::RandomF() > 0.999f)
         {
             child = TruncateMutator::Mutate(child);
         }
         if (Expression::RandomF() < Solver::GetTemp())
         {
-            // cout << "\tDone:" << child->ToString() << endl;
             return child;
         }
         // child needs to be better than one of the parents
     } while (child->Fitness() < p1->Fitness() &&
              child->Fitness() < p2->Fitness());
-    // cout << "\tDone:" << child->ToString() << endl;
     return child;
 }
 
