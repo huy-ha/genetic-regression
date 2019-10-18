@@ -4,6 +4,7 @@
 #include "../mutators/ConstantMutator.hpp"
 #include "../mutators/SubexpressionMutator.hpp"
 #include "../mutators/ConstantMultiplierMutator.hpp"
+#include "../mutators/TrigMultiplierMutator.hpp"
 #include "../mutators/TruncateMutator.hpp"
 #include <algorithm>
 #include <iostream>
@@ -51,14 +52,20 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
         }
         child = ConstantMutator::Mutate(child);
         child = ConstantMultiplierMutator::Mutate(child);
-        if (Expression::RandomF() > 0.99f)
+
+        if (Expression::RandomF() > 0.8f)
+        {
+            child = TrigMultiplierMutator::Mutate(child);
+        }
+        else if (Expression::RandomF() > 0.99f)
         {
             child = SubexpressionMutator::Mutate(child);
         }
-        if (Expression::RandomF() > 0.999f)
+        else if (Expression::RandomF() > 0.99f)
         {
             child = TruncateMutator::Mutate(child);
         }
+
         if (Expression::RandomF() < Solver::GetTemp())
         {
             return child;

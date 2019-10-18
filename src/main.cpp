@@ -6,8 +6,6 @@
 #include "engine/OutputLogger.hpp"
 #include <chrono>
 
-#include "genetic-programming/mutators/TrigMultiplierMutator.hpp"
-
 using namespace std;
 using namespace std::chrono;
 using namespace SymbolicRegression;
@@ -38,23 +36,23 @@ int main(int argc, char **argv)
     try
     {
         Config config(configFile, outputDir);
-        {
-            auto exp = Expression::GenerateRandomExpression(0);
-            cout << exp->ToString() << ":" << exp->Fitness() << endl;
-            exp = TrigMultiplierMutator::Mutate(exp);
-            cout << exp->ToString() << ":" << exp->Fitness() << endl;
-        }
-        return 0;
-        // OutputLogger::Log("Config", "Seed:" + to_string(seed));
-        // OutputLogger::Log("Config", string(config));
-        // cout << string(config) << endl;
-        // auto solver = Solver::Instance();
-        // auto start = high_resolution_clock::now();
-        // solver->Run();
-        // auto stop = high_resolution_clock::now();
-        // auto ms = duration_cast<milliseconds>(stop - start);
-        // float seconds = ms.count() / 1000.0f;
-        // cout << "Total Time of Run: " << seconds << endl;
+        // {
+        //     auto exp = Expression::GenerateRandomExpression(0);
+        //     cout << exp->ToString() << ":" << exp->Fitness() << endl;
+        //     exp = TrigMultiplierMutator::Mutate(exp);
+        //     cout << exp->ToString() << ":" << exp->Fitness() << endl;
+        // }
+        // return 0;
+        OutputLogger::Log("Config", "Seed:" + to_string(seed));
+        OutputLogger::Log("Config", string(config));
+        cout << string(config) << endl;
+        auto solver = Solver::Instance();
+        auto start = high_resolution_clock::now();
+        solver->Run();
+        auto stop = high_resolution_clock::now();
+        auto ms = duration_cast<milliseconds>(stop - start);
+        float seconds = ms.count() / 1000.0f;
+        cout << "Total Time of Run: " << seconds << endl;
     }
     catch (exception e)
     {
