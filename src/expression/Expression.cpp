@@ -198,12 +198,12 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
         //     {
         //         ReplaceExpression(expToSimplify, replacementExp);
         //     }
+        // }
+        else
+        {
+            return exp;
+        }
     }
-    else
-    {
-        return exp;
-    }
-}
 } // namespace SymbolicRegression
 
 bool Expression::IsValid(shared_ptr<Expression> exp)

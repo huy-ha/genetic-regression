@@ -53,15 +53,15 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
         child = ConstantMutator::Mutate(child);
         child = ConstantMultiplierMutator::Mutate(child);
 
-        if (Expression::RandomF() > 0.8f)
+        if (Expression::RandomF() > 0.999f)
         {
             child = TrigMultiplierMutator::Mutate(child);
         }
-        else if (Expression::RandomF() > 0.99f)
+        else if (Expression::RandomF() > 0.999f)
         {
             child = SubexpressionMutator::Mutate(child);
         }
-        else if (Expression::RandomF() > 0.99f)
+        else if (Expression::RandomF() > 0.999f)
         {
             child = TruncateMutator::Mutate(child);
         }

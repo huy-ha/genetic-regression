@@ -23,7 +23,26 @@ shared_ptr<Expression> ConstantMutator::Mutate(shared_ptr<Expression> exp)
         return exp;
     i = i % constants.size();
     auto constantToMutate = dynamic_pointer_cast<Constant>(constants[i]);
-    constantToMutate->m_k = constantToMutate->m_k + Expression::RandomF() * 0.3f;
+
+    float k, bestK;
+    float prevFitness = exp->Fitness();
+    float testFitness = -1;
+    for (int i = 0; i < 10; i++)
+    {
+        auto f = [=](float x) { return k; };
+        testFitness = exp->Fitness(f);
+        if (testFitness > prevFitness)
+        {
+            prevFitness = testFitness;
+            bestK = k;
+        }
+    }
+
+    if (prevFitness == exp->Fitness())
+    {
+        return exp;
+    }
+    constantToMutate->m_k = bestK;
     return exp;
 }
 } // namespace SymbolicRegression

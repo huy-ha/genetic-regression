@@ -108,7 +108,7 @@ void Solver::Evolve()
     }
     // Selection
     auto it = m_population.begin();
-    advance(it, m_population.size() * 0.5f);
+    advance(it, m_population.size() * 0.7f);
     m_population.erase(it, m_population.end());
     // Reproduce
     // auto offspring = m_reproducer->AsyncReproduce(m_population);
