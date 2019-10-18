@@ -97,7 +97,7 @@ shared_ptr<list<shared_ptr<Expression>>> Reproducer::Reproduce(const list<shared
     {
         auto pair = ChooseTwoParents(parents);
         auto offspring = CreateOffspring(get<0>(pair), get<1>(pair));
-        if (m_offsprings.find(offspring->ToString()) == m_offsprings.end())
+        if (Expression::IsValid(offspring) && m_offsprings.find(offspring->ToString()) == m_offsprings.end())
         {
             m_offsprings.insert(make_pair(offspring->ToString(), offspring));
         }
