@@ -3,6 +3,7 @@
 #include "../../expression/Expression.hpp"
 #include "../mutators/ConstantMutator.hpp"
 #include "../mutators/SubexpressionMutator.hpp"
+#include "../mutators/ConstantMultiplierMutator.hpp"
 #include "../mutators/TruncateMutator.hpp"
 #include <algorithm>
 #include <iostream>
@@ -50,6 +51,7 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
             *cross1 = Expression::Copy(*cross2);
         }
         child = ConstantMutator::Mutate(child);
+        child = ConstantMultiplierMutator::Mutate(child);
         if (Expression::RandomF() > 0.95f)
         {
             child = SubexpressionMutator::Mutate(child);

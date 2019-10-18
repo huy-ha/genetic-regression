@@ -1,6 +1,8 @@
 #ifndef _MULTIPLY_HPP_
 #define _MULTIPLY_HPP_
 #include "Expression.hpp"
+#include "../engine/Config.hpp"
+
 namespace SymbolicRegression
 {
 using namespace std;
@@ -19,6 +21,17 @@ public:
             m_subexpressions.push_back(std::shared_ptr<Expression>(Expression::GenerateRandomExpression(level + 1)));
             m_subexpressions.push_back(std::shared_ptr<Expression>(Expression::GenerateRandomExpression(level + 1)));
         }
+        m_func = [&](float x) {
+            return m_subexpressions[0]->ToFunction()(x) * m_subexpressions[1]->ToFunction()(x);
+        };
+        m_order = 2;
+    }
+
+    inline Multiply(int level, shared_ptr<Expression> e1, shared_ptr<Expression> e2) : Expression(level)
+    {
+
+        m_subexpressions.push_back(e1);
+        m_subexpressions.push_back(e2);
         m_func = [&](float x) {
             return m_subexpressions[0]->ToFunction()(x) * m_subexpressions[1]->ToFunction()(x);
         };

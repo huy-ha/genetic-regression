@@ -9,6 +9,7 @@ namespace SymbolicRegression
 class Constant : public Expression
 {
 public:
+    friend class ConstantMultiplierMutator;
     inline Constant(int level) : Expression(level)
     {
         m_k = SymbolicRegression::Expression::RandomF(-10, 10);

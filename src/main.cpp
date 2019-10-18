@@ -6,6 +6,8 @@
 #include "engine/OutputLogger.hpp"
 #include <chrono>
 
+#include "genetic-programming/mutators/ConstantMultiplierMutator.hpp"
+
 using namespace std;
 using namespace std::chrono;
 using namespace SymbolicRegression;
@@ -38,7 +40,9 @@ int main(int argc, char **argv)
         Config config(configFile, outputDir);
         // {
         //     auto exp = Expression::GenerateRandomExpression(0);
-        //     cout << exp->ToString() << endl;
+        //     cout << exp->ToString() << ":" << exp->Fitness() << endl;
+        //     exp = ConstantMultiplierMutator::Mutate(exp);
+        //     cout << exp->ToString() << ":" << exp->Fitness() << endl;
         // }
         // return 0;
         OutputLogger::Log("Config", "Seed:" + to_string(seed));

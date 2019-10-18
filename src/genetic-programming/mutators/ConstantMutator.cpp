@@ -3,7 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include "../../expression/Constant.hpp"
-#include <typeinfo>
+
 namespace SymbolicRegression
 {
 using namespace std;
@@ -17,7 +17,7 @@ shared_ptr<Expression> ConstantMutator::Mutate(shared_ptr<Expression> exp)
         collapsedExp->end(),
         back_inserter(constants),
         [](auto e) {
-            return string(typeid(*e).name()) == string("class SymbolicRegression::Constant");
+            return EXPRESSION_TYPE(e) == CONSTANT_T;
         });
     if (constants.size() == 0)
         return exp;

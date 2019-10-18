@@ -7,6 +7,7 @@
 #include <memory>
 #include <algorithm>
 #include <mutex>
+#include <typeinfo>
 namespace SymbolicRegression
 {
 using namespace std;
@@ -21,6 +22,7 @@ public:
 
     friend class SubexpressionMutator;
     friend class TruncateMutator;
+    friend class ConstantMultiplierMutator;
     friend class CrossoverMutatorReproducer;
 
 public:
@@ -46,7 +48,8 @@ public:
     virtual function<float(float)> ToFunction() const;
 
     float Fitness();
-    float CalculateFitness() const;
+    float Fitness(float k);
+    float CalculateFitness(float k = 1) const;
 
     inline int Order() const { return m_order; }
     inline int Level() const { return m_level; }
@@ -62,7 +65,15 @@ public:
     static ExpressionPredicate subexpressionsCancelOut;
     static ExpressionPredicate all;
     static ExpressionPredicate minusOrDivide;
-
+#define EXPRESSION_TYPE(exp) string(typeid(*exp).name())
+#define CONSTANT_T string("class SymbolicRegression::Constant")
+#define VARIABLE_T string("class SymbolicRegression::Variable")
+#define SIN_T string("class SymbolicRegression::Sin")
+#define COS_T string("class SymbolicRegression::Cos")
+#define PLUS_T string("class SymbolicRegression::Plus")
+#define MINUS_T string("class SymbolicRegression::Minus")
+#define DIVIDE_T string("class SymbolicRegression::Divide")
+#define MULTIPLY_T string("class SymbolicRegression::Multiply")
 protected:
     Expression(int level);
     Expression(const Expression &other);

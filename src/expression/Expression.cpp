@@ -77,18 +77,23 @@ float Expression::Fitness()
 {
     if (m_fitness == -1)
     {
-        m_fitness = CalculateFitness();
+        m_fitness = CalculateFitness(1);
     }
     return m_fitness;
 }
 
-float Expression::CalculateFitness() const
+float Expression::Fitness(float k)
+{
+    return CalculateFitness(k);
+}
+
+float Expression::CalculateFitness(float k) const
 {
     using namespace std;
     function<float(float)> f = ToFunction();
     float AbsoluteErrorSum = 0;
     for_each(Config::Data->begin(), Config::Data->end(), [&](tuple<float, float> datapoint) {
-        AbsoluteErrorSum += abs(f(get<0>(datapoint)) - get<1>(datapoint));
+        AbsoluteErrorSum += abs(f(get<0>(datapoint)) * k - get<1>(datapoint));
     });
     float AbsoluteMeanError = AbsoluteErrorSum / Config::Data->size();
     OutputLogger::IncrementEvaluations();
