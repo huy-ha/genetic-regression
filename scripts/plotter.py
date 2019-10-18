@@ -123,7 +123,20 @@ def get_dir_name(runNumber):
     #     plt.show()
 
 if __name__ == "__main__":
-    dirname = get_dir_name(2)
+    # Parse Arguments
+    parser = argparse.ArgumentParser(description='Plot a run')
+    parser.add_argument(
+        '-t', '--title', nargs='+', help='title of output graph', required=False)
+    parser.add_argument('-r', '--runs', nargs='+', action='append',
+                        help='runs to average', required=False)
+    parser.add_argument('-l', '--labels', nargs='+',
+                        help='labels for each group of run', required=False)
+    args = parser.parse_args()
+    dirname = "runs/tmp/"
+    if args.runs != None:
+        print("Runs supplied")
+        dirname = get_dir_name(2)
+
     x, y, filepath, eqn = import_finalbest(dirname + "FinalBest.txt")
     plt.scatter(x, y, label=eqn)
     x, y, title = import_xy('inputs/data.txt')
@@ -138,13 +151,5 @@ if __name__ == "__main__":
     plt.show()
     exit()
 
-parser = argparse.ArgumentParser(description='Plot a run')
-parser.add_argument(
-    '-t', '--title', nargs='+', help='title of output graph', required=False)
-parser.add_argument('-r', '--runs', nargs='+', action='append',
-                    help='runs to average', required=False)
-parser.add_argument('-l', '--labels', nargs='+',
-                    help='labels for each group of run', required=False)
-args = parser.parse_args()
 
 # plot_learning_curve(args)
