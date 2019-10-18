@@ -38,8 +38,7 @@ Expression::ExpressionPredicate Expression::evaluatesToConstant = [](auto subexp
 };
 
 Expression::ExpressionPredicate Expression::subexpressionsCancelOut = [](auto subexpression) {
-    return string(typeid(*subexpression).name()) ==
-           string("class SymbolicRegression::Variable");
+    return EXPRESSION_TYPE(subexpression) == VARIABLE_T;
 };
 
 Expression::ExpressionPredicate Expression::all = [](auto op) {
@@ -47,9 +46,15 @@ Expression::ExpressionPredicate Expression::all = [](auto op) {
 };
 
 Expression::ExpressionPredicate Expression::minusOrDivide = [&](auto op) {
-    auto typeStr = string(typeid(*op).name());
-    return typeStr == string("class SymbolicRegression::Divide") ||
-           typeStr == string("class SymbolicRegression::Minus");
+    auto typeStr = EXPRESSION_TYPE(op);
+    return typeStr == DIVIDE_T ||
+           typeStr == MINUS_T;
+};
+
+Expression::ExpressionPredicate Expression::isTrigFunction = [&](auto op) {
+    auto typeStr = EXPRESSION_TYPE(op);
+    return typeStr == SIN_T ||
+           typeStr == SIN_T;
 };
 
 mutex Expression::randMutex;
@@ -169,7 +174,28 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
                 ReplaceExpression(expToSimplify, replacementConstant);
             }
         }
+        // 4. check for nested trig functions
+        else if ((it = FindFirst(operators, isTrigFunction, isTrigFunction)) != operators.end())
+        {
+            auto expToSimplify = (*it);
 
+            // replace with constant at same level and of the same size
+            auto randConstExpression = shared_ptr<Expression>(
+                new Constant(expToSimplify->Level()));
+            auto variableExprssion = shared_ptr<Expression>(
+                new Variable(expToSimplify->Level()));
+            auto replacementExp = shared_ptr<Expression>(
+                new Multiply((*it)->Level(), randConstExpression, variableExprssion));
+            //no parent
+            if (expToSimplify->Level() == 0)
+            {
+                return replacementExp;
+            }
+            else
+            {
+                ReplaceExpression(expToSimplify, replacementExp);
+            }
+        }
         else
         {
             return exp;

@@ -41,8 +41,10 @@ int main(int argc, char **argv)
         // {
         //     auto exp = Expression::GenerateRandomExpression(0);
         //     cout << exp->ToString() << ":" << exp->Fitness() << endl;
-        //     exp = ConstantMultiplierMutator::Mutate(exp);
-        //     cout << exp->ToString() << ":" << exp->Fitness() << endl;
+        //     cout << Expression::AnySubExpression(exp, [](auto e) {
+        //         return EXPRESSION_TYPE(e) == COS_T;
+        //     }) << endl;
+        //     ;
         // }
         // return 0;
         OutputLogger::Log("Config", "Seed:" + to_string(seed));

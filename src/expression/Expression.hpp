@@ -64,6 +64,7 @@ public:
     static ExpressionPredicate evaluatesToConstant;
     static ExpressionPredicate subexpressionsCancelOut;
     static ExpressionPredicate all;
+    static ExpressionPredicate isTrigFunction;
     static ExpressionPredicate minusOrDivide;
 #define EXPRESSION_TYPE(exp) string(typeid(*exp).name())
 #define CONSTANT_T string("class SymbolicRegression::Constant")
@@ -74,6 +75,7 @@ public:
 #define MINUS_T string("class SymbolicRegression::Minus")
 #define DIVIDE_T string("class SymbolicRegression::Divide")
 #define MULTIPLY_T string("class SymbolicRegression::Multiply")
+
 protected:
     Expression(int level);
     Expression(const Expression &other);
@@ -86,6 +88,15 @@ protected:
         return find_if(operators.begin(), operators.end(), [&](auto op) {
             return opPredicate(op) && all_of(op->m_subexpressions.begin(), op->m_subexpressions.end(), subexpPredicate);
         });
+    }
+
+    inline static bool AnySubExpression(shared_ptr<Expression> exp, ExpressionPredicate pred)
+    {
+        return pred(exp) || any_of(
+                                exp->m_subexpressions.begin(),
+                                exp->m_subexpressions.end(), [&](auto subexp) {
+                                    return AnySubExpression(subexp, pred);
+                                });
     }
 
     // replaces e1 with e2 in e1's original expression tree
