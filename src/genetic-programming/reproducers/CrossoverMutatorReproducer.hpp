@@ -9,8 +9,6 @@ class CrossoverMutatorReproducer : public Reproducer
 
 public:
     inline CrossoverMutatorReproducer(int populationCount) : Reproducer(populationCount){};
-
-protected:
     virtual shared_ptr<Expression> CreateOffspring(const shared_ptr<Expression> p1, const shared_ptr<Expression> p2) override;
 
 private:

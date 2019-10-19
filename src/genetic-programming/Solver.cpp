@@ -1,17 +1,19 @@
 #include "Solver.hpp"
 #include "../expression/Expression.hpp"
-#include "../engine/Config.hpp"
 #include <functional>
 #include <algorithm>
-#include <iterator>
+#include "../engine/Config.hpp"
 #include "../engine/OutputLogger.hpp"
 #include "reproducers/RandomReproducer.hpp"
 #include "reproducers/MutatorReproducer.hpp"
 #include "reproducers/CrossoverMutatorReproducer.hpp"
+#include "selectors/TournamentSelector.hpp"
 #include <fstream>
 #include <windows.h>
 #include "../expression/Constant.hpp"
 
+#include "GenerationalSolver.hpp"
+#include "ContinuousSolver.hpp"
 namespace SymbolicRegression
 {
 using namespace std;
@@ -36,13 +38,24 @@ Solver::Solver()
     {
         m_reproducer = shared_ptr<Reproducer>(new RandomReproducer(m_populationCount));
     }
+    string selectorConfig = Config::GetString("Selector");
+    m_selector = shared_ptr<Selector>(new TournamentSelector());
+    collectDataForDotPlot = Config::GetInt("DotPlot");
 }
 
 shared_ptr<Solver> Solver::Instance()
 {
     if (!m_instance)
     {
-        m_instance = shared_ptr<Solver>(new Solver());
+        string solverConfig = Config::GetString("Solver");
+        if (solverConfig == "Continuous")
+        {
+            m_instance = shared_ptr<Solver>(new ContinuousSolver());
+        }
+        else
+        {
+            m_instance = shared_ptr<Solver>(new GenerationalSolver());
+        }
     }
     return m_instance;
 }
@@ -66,76 +79,6 @@ void Solver::InitializePopulation()
             m_population.emplace_front(newExp);
         }
     }
-}
-
-void Solver::Run()
-{
-    int generationCount = Config::GetInt("GenerationCount");
-    int saveEval = 0;
-    InitializePopulation();
-    for (int i = 0; i < generationCount; i++)
-    {
-        Evolve();
-        DecayTemp();
-        if (OutputLogger::GetEvaluations() > saveEval * 100000)
-        {
-            SaveOutput();
-            saveEval++;
-        }
-    }
-    SaveOutput();
-    m_population.sort(Expression::FitnessComparer);
-    auto finalBest = *m_population.begin();
-    cout << "FITNESS " << m_prevHighestFitness
-         << " after " << OutputLogger::GetEvaluations() << " evalutions at temp " << GetTemp() << endl;
-    cout << "\t" + finalBest->ToString() << endl;
-}
-
-void Solver::Evolve()
-{
-    for_each(m_population.begin(), m_population.end(),
-             [](const shared_ptr<Expression> &exp) { exp->Fitness(); });
-    // Sort in decreasing order of fitness
-    m_population.sort(Expression::FitnessComparer);
-    // Find best in current population
-    shared_ptr<Expression> bestExpression = *(m_population.begin());
-    if (bestExpression->Fitness() > m_prevHighestFitness)
-    {
-        m_prevHighestFitness = bestExpression->Fitness();
-        cout << "FITNESS " << m_prevHighestFitness
-             << " after " << OutputLogger::GetEvaluations() << " evalutions at temp " << GetTemp() << endl;
-        cout << "\t" + bestExpression->ToString() << endl;
-    }
-    // Selection
-    auto it = m_population.begin();
-    advance(it, m_population.size() * 0.7f);
-    m_population.erase(it, m_population.end());
-    // Reproduce
-    // auto offspring = m_reproducer->AsyncReproduce(m_population);
-    auto offspring = m_reproducer->Reproduce(m_population);
-
-    // Handle Elites
-    auto eliteEnd = m_population.begin();
-    advance(eliteEnd, m_eliteCount);
-    list<shared_ptr<Expression>> elites(m_population.begin(), eliteEnd);
-    // Create new population
-    m_population.clear();
-    copy(elites.begin(), elites.end(), front_inserter(m_population));
-    copy(offspring->begin(), offspring->end(), front_inserter(m_population));
-    m_population.sort(Expression::FitnessComparer);
-
-    // Ensure size of population
-    if (m_population.size() < m_populationCount)
-    {
-        cout << "ERROR: LOST EXPRESSIONS" << endl;
-        throw exception("Lost Expressions");
-    }
-    else if (m_population.size() > m_populationCount)
-    {
-        m_population.resize(m_populationCount);
-    }
-    // Collect Stats
-    OutputLogger::Log("HighestFitness", to_string(OutputLogger::GetEvaluations()) + " " + to_string(m_prevHighestFitness));
 }
 
 void Solver::SaveOutput()
@@ -175,7 +118,18 @@ void Solver::SaveOutput()
     {
         // Failed for some other reason
         cout << "Failed to create output directory" << endl;
+        exit(-1);
     }
+}
+
+void Solver::SavePopulationFitnesses()
+{
+    string s = "";
+    s += to_string(OutputLogger::GetEvaluations()) + " ";
+    for_each(m_population.begin(), m_population.end(), [&s](auto e) {
+        s += to_string(e->Fitness()) + " ";
+    });
+    OutputLogger::Log("FitnessDotPlot", s);
 }
 
 float Solver::GetTemp()

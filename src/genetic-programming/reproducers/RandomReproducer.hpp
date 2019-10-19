@@ -8,8 +8,6 @@ class RandomReproducer : public Reproducer
 {
 public:
     inline RandomReproducer(int populationCount) : Reproducer(populationCount){};
-
-protected:
     virtual shared_ptr<Expression> CreateOffspring(const shared_ptr<Expression> p1, const shared_ptr<Expression> p2) override;
 };
 } // namespace SymbolicRegression

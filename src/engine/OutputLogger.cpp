@@ -21,6 +21,7 @@ OutputLogger::OutputLogger()
     m_log.insert(pair<string, string>("Config", ""));
     m_log.insert(pair<string, string>("HighestFitness", ""));
     m_log.insert(pair<string, string>("FinalBest", ""));
+    m_log.insert(pair<string, string>("FitnessDotPlot", ""));
 }
 
 shared_ptr<vector<string>> OutputLogger::GetKeys()

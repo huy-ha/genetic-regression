@@ -39,6 +39,7 @@ public:
 
     static float RandomF();
     static float RandomF(float min, float max);
+    static void Random(int min, int max, int count, vector<int> &output);
     inline virtual string ToString() const = 0;
     static shared_ptr<Expression> Copy(const shared_ptr<Expression> &source);
 

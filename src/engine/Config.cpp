@@ -15,7 +15,9 @@ Config::Config(string configFilePath, string outputFilePath)
 {
     m_configs.insert(make_pair("Input", "data.txt"));
 
+    m_configs.insert(make_pair("Solver", "Continuous"));
     m_configs.insert(make_pair("Reproducer", "CrossoverMutator"));
+    m_configs.insert(make_pair("Selector", "Tournament"));
     m_configs.insert(make_pair("MinThreads", "20"));
     m_configs.insert(make_pair("MaxThreads", "-1"));
     m_configs.insert(make_pair("MaxDepth", "5"));
@@ -26,16 +28,20 @@ Config::Config(string configFilePath, string outputFilePath)
     m_configs.insert(make_pair("PopulationCount", "100"));
     m_configs.insert(make_pair("GenerationCount", "50000"));
     m_configs.insert(make_pair("ElitesCount", "1"));
+    m_configs.insert(make_pair("DotPlot", "1"));
     m_configs.insert(make_pair("OutputPath", "runs/" + outputFilePath + "/"));
     Instance = this;
-    string buf;
-    ifstream configFile;
-    configFile.open("configs/" + configFilePath);
-    if (!configFile.is_open())
-        BadConfigFile("Can't open file");
-    while (getline(configFile, buf))
-        ParseConfigLine(buf);
-    configFile.close();
+    if (configFilePath != "")
+    {
+        string buf;
+        ifstream configFile;
+        configFile.open("configs/" + configFilePath);
+        if (!configFile.is_open())
+            BadConfigFile("Can't open file");
+        while (getline(configFile, buf))
+            ParseConfigLine(buf);
+        configFile.close();
+    }
     ParseInputDatapoints(m_configs["Input"]);
     // UseTestInputDatapoints();
 }

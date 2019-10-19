@@ -12,14 +12,12 @@ using namespace SymbolicRegression;
 int main(int argc, char **argv)
 {
     int seed = int(time(NULL));
-    string configFile = "default.config";
-    string outputDir;
-    if (argc < 2)
+    string configFile = "";
+    string outputDir = "tmp";
+    if (argc > 1)
     {
-        cout << "Please supply an output directory" << endl;
-        return -1;
+        outputDir = string(argv[1]);
     }
-    outputDir = string(argv[1]);
     if (argc > 2)
     {
         // output dir and config supplied

@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include "../../expression/Constant.hpp"
+#include "../Solver.hpp"
 
 namespace SymbolicRegression
 {
@@ -27,11 +28,11 @@ shared_ptr<Expression> ConstantMutator::Mutate(shared_ptr<Expression> exp)
     float k, bestK;
     float prevFitness = exp->Fitness();
     float testFitness = -1;
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 1; i++)
     {
         auto f = [=](float x) { return k; };
         testFitness = exp->Fitness(f);
-        if (testFitness > prevFitness)
+        if (testFitness > prevFitness || Expression::RandomF() < Solver::GetTemp())
         {
             prevFitness = testFitness;
             bestK = k;

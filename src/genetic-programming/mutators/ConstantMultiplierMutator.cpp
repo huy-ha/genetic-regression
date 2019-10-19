@@ -17,7 +17,7 @@ shared_ptr<Expression> ConstantMultiplierMutator::Mutate(shared_ptr<Expression> 
     prevFitness = exp->Fitness();
     vector<shared_ptr<Expression>>::iterator it;
     // TODO try increasing or decreasing
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 1; i++)
     {
         // Find subexpression of type constant
         it = find_if(exp->m_subexpressions.begin(),

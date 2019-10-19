@@ -13,14 +13,17 @@ class Reproducer
 {
 public:
     Reproducer(int populationCount);
-    shared_ptr<list<shared_ptr<Expression>>> AsyncReproduce(const list<shared_ptr<Expression>> &parents);
-    shared_ptr<list<shared_ptr<Expression>>> Reproduce(const list<shared_ptr<Expression>> &parents);
+    shared_ptr<list<shared_ptr<Expression>>> AsyncReproduce(
+        const list<shared_ptr<Expression>> &parents);
+    shared_ptr<list<shared_ptr<Expression>>> Reproduce(
+        const list<shared_ptr<Expression>> &parents);
+    virtual shared_ptr<Expression> CreateOffspring(
+        const shared_ptr<Expression> p1, const shared_ptr<Expression> p2) = 0;
 
 protected:
     int m_populationCount = -1;
     map<string, shared_ptr<Expression>> m_offsprings;
     void TryInsertOffspring(shared_ptr<Expression> exp);
-    virtual shared_ptr<Expression> CreateOffspring(const shared_ptr<Expression> p1, const shared_ptr<Expression> p2) = 0;
 
 private:
     tuple<shared_ptr<Expression>, shared_ptr<Expression>> ChooseTwoParents(const list<shared_ptr<Expression>> &parents);

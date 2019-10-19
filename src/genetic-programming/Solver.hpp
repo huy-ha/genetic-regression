@@ -4,6 +4,7 @@
 #include <memory>
 #include <mutex>
 #include "reproducers/Reproducer.hpp"
+#include "selectors/Selector.hpp"
 namespace SymbolicRegression
 {
 using namespace std;
@@ -11,26 +12,30 @@ class Solver
 {
 public:
     Solver();
-    void Run();
+    virtual void Run() = 0;
     void SaveOutput();
     static shared_ptr<Solver> Instance();
     static float GetTemp();
     static void DecayTemp();
+    void SavePopulationFitnesses();
 
 protected:
     void InitializePopulation();
-    void Evolve();
     void PrintPopulation();
 
-private:
+protected:
     list<shared_ptr<Expression>> m_population;
     int m_populationCount = -1;
     shared_ptr<Reproducer> m_reproducer;
     int m_eliteCount = -1;
     float m_prevHighestFitness = -1;
+    shared_ptr<Selector> m_selector;
+
+private:
     static shared_ptr<Solver> m_instance;
     static float m_temperature;
     static mutex tempMutex;
+    bool collectDataForDotPlot;
 };
 } // namespace SymbolicRegression
 #endif

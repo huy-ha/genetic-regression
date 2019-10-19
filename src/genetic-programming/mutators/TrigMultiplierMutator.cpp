@@ -17,7 +17,7 @@ shared_ptr<Expression> TrigMultiplierMutator::Mutate(shared_ptr<Expression> exp)
     float frequency, displacement, output_frequency, output_displacement;
     float prevFitness, testFitness;
     prevFitness = exp->Fitness();
-    for (int i = 0; i < 200; i++)
+    for (int i = 0; i < 1; i++)
     {
         if (exp->Depth() >= Config::GetInt("MaxDepth"))
         {

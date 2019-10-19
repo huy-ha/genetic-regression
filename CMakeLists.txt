@@ -11,6 +11,7 @@ file(GLOB symreg_SRC
     "src/expression/*.cpp"
     "src/genetic-programming/*.cpp"
     "src/genetic-programming/reproducers/*.cpp"
+    "src/genetic-programming/selectors/*.cpp"
     "src/genetic-programming/mutators/*.cpp"
     "src/*.cpp"
 )
@@ -21,6 +22,7 @@ include_directories( ./include ./src ./src/engine )
 
 # target
 add_executable( gp_regression ${symreg_SRC})
+set_property(TARGET gp_regression PROPERTY CXX_STANDARD 17)
 
 #external libs
 # add_subdirectory( ./libs/Logger ) only for static 
