@@ -22,6 +22,25 @@ def import_xy(filepath, tab=True):
     return x, y, filepath
 
 
+def import_dotplot(filepath):
+    evals = []
+    fitnesses = []
+    lines = open(filepath, "r").readlines()
+    for line in lines:
+        splitted = line.split(' ')
+        if '\n' in splitted:
+            splitted.remove('\n')
+        evals.append(float(splitted.pop(0)))
+        fitnesses.append([float(x) for x in splitted])
+    x = []
+    y = []
+    for i in range(len(evals)):
+        for j in range(len(fitnesses[i])):
+            x.append(evals[i])
+            y.append(fitnesses[i][j])
+    return x, y
+
+
 def import_finalbest(filepath):
     f = open(filepath, "r")
     lines = f.readlines()
@@ -49,78 +68,35 @@ def get_dir_name(runNumber):
         print("Run {} not found!".format(runNumber))
 
 
-# def average_runs(runs):
-    # evals = []
-    # counts = []
-    # fitnesses = []
-    # for run in runs:
-    #     runEvals = []
-    #     runFitnesses = []
-    #     count = 0
-    #     for i in run:
-    #         dirname = get_dir_name(int(i))
-    #         new_eval_list = import_xy("{}/Evaluations.txt".format(dirname))
-    #         if len(runEvals) == 0:
-    #             runEvals.append(new_eval_list)
-    #             count = len(new_eval_list)
-    #         else:
-    #             if len(runEvals[0]) != len(new_eval_list):
-    #                 print("Mismatch length of {} and {}. Taking {}...".format(
-    #                     count, len(new_eval_list), min(count, len(new_eval_list))))
-    #             count = min(count, len(new_eval_list))
-    #             evals.append(new_eval_list)
-    #         runMaxCosts.append(
-    #             read_file("{}/MaxCosts.txt".format(dirname)))
-    #         runMinCosts.append(
-    #             read_file("{}/MinCosts.txt".format(dirname)))
-    #         runAvgCosts.append(
-    #             read_file("{}/AvgCosts.txt".format(dirname)))
-    #     runEvals = [runEval[0:count] for runEval in runEvals]
-    #     runMaxCosts = [runMaxCost[0:count] for runMaxCost in runMaxCosts]
-    #     runMinCosts = [runMinCost[0:count] for runMinCost in runMinCosts]
-    #     runAvgCosts = [runAvgCost[0:count] for runAvgCost in runAvgCosts]
-    #     n_sqrt = math.sqrt(len(i))
-    #     maxCosts.append(np.mean(runMaxCosts, axis=0)[0:count])
-    #     maxCostsErr.append(
-    #         np.std(runMaxCosts, axis=0) / n_sqrt)
-    #     minCosts.append(np.mean(runMinCosts, axis=0)[0:count])
-    #     minCostsErr.append(
-    #         np.std(runMinCosts, axis=0) / n_sqrt)
-    #     avgCosts.append(np.mean(runAvgCosts, axis=0)[0:count])
-    #     evals.append(np.mean(runEvals, axis=0)[0:count])
-    #     counts.append(count)
-    # return counts, evals, maxCosts, minCosts, avgCosts, maxCostsErr, minCostsErr
+def plot_final_best(filePath):
+    x, y, filepath, eqn = import_finalbest(filePath)
+    plt.scatter(x, y, label=eqn)
+    x, y, title = import_xy('inputs/data.txt')
+    plt.scatter(x, y, label='dataset')
+    plt.legend()
+    plt.title(eqn)
+    plt.show()
 
-    # def plot_learning_curve(args):
-    #     runs = args.runs
-    #     labels = args.labels
 
-    #     logconfig = args.log
-    #     title = args.title
-    #     colors = ['red', 'lime', 'cyan', 'blue', 'yellow', 'orange']
-    #     if title is None:
-    #         title = "Symbolic Regression"
-    #     counts, evals, maxCost, minCost, avgCost, maxCostErr, minCostErr = average_runs(
-    #         runs)
-    #     for i in range(len(runs)):
-    #         count = counts[i]
-    #         if logconfig is not None and logconfig == "y":
-    #             evals[i] = [math.log(x) for x in evals[i]]
-    #         if config == "max":
-    #             plt.errorbar(evals[i][0:count], maxCost[i][0:count], yerr=maxCostErr[i][0:count],
-    #                          label=labels[i], color=colors[i], ecolor=colors[i], errorevery=500)
-    #         elif config == "min":
-    #             plt.errorbar(evals[i][0:count], minCost[i][0:count], yerr=minCostErr[i][0:count],
-    #                          label=labels[i], color=colors[i], ecolor=colors[i], errorevery=500)
-    #         elif config == "avg":
-    #             plt.plot(evals[i], avgCost[i], label=labels[i])
-    #     plt.legend()
-    #     plt.title(title)
-    #     plt.ylabel('Costs')
-    #     plt.xlabel('Log of Evaluations')
-    #     if args.xlimit is not None:
-    #         plt.xlim(int(args.xlimit[0]), int(args.xlimit[1]))
-    #     plt.show()
+def plot_highest_fitness(filepath):
+    x, y, title = import_xy(filepath, False)
+    plt.plot(x, y)
+    plt.title("Highest Fitness")
+    plt.show()
+
+
+def plot_fitness_dotplot(filepath):
+    x, y = import_dotplot(filepath)
+    plt.scatter(x, y)
+    plt.title("Fitness Dot Plot")
+    plt.show()
+
+
+def plot_dir(dir):
+    # plot_final_best(dirname + "FinalBest.txt")
+    plot_fitness_dotplot(dirname + "FitnessDotPlot.txt")
+    # plot_highest_fitness(dirname + "HighestFitness.txt")
+
 
 if __name__ == "__main__":
     # Parse Arguments
@@ -134,22 +110,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     dirname = "runs/tmp/"
     if args.runs != None:
-        print("Runs supplied:{}".format(args.runs))
         dirname = get_dir_name(args.runs[0][0])
-
-    x, y, filepath, eqn = import_finalbest(dirname + "FinalBest.txt")
-    plt.scatter(x, y, label=eqn)
-    x, y, title = import_xy('inputs/data.txt')
-    plt.scatter(x, y, label='dataset')
-    plt.legend()
-    plt.title(eqn)
-    plt.show()
-    x, y, title = import_xy(dirname + "HighestFitness.txt", False)
-    plt.plot(x, y, label=eqn)
-    plt.legend()
-    plt.title(eqn)
-    plt.show()
-    exit()
-
+    plot_dir(dirname)
 
 # plot_learning_curve(args)
