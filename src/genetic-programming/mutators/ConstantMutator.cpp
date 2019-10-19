@@ -8,9 +8,10 @@
 namespace SymbolicRegression
 {
 using namespace std;
-shared_ptr<Expression> ConstantMutator::Mutate(shared_ptr<Expression> exp)
+shared_ptr<Expression> ConstantMutator::Mutate(const shared_ptr<Expression> &exp)
 {
-    auto collapsedExp = exp->Collapse(exp);
+    auto tempExp = Expression::Copy(exp);
+    auto collapsedExp = tempExp->Collapse(tempExp);
     vector<shared_ptr<Expression>> constants;
     int i = int(Expression::RandomF(0, 100));
     copy_if(
@@ -26,12 +27,12 @@ shared_ptr<Expression> ConstantMutator::Mutate(shared_ptr<Expression> exp)
     auto constantToMutate = dynamic_pointer_cast<Constant>(constants[i]);
 
     float k, bestK;
-    float prevFitness = exp->Fitness();
+    float prevFitness = tempExp->Fitness();
     float testFitness = -1;
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 10; i++)
     {
         auto f = [=](float x) { return k; };
-        testFitness = exp->Fitness(f);
+        testFitness = tempExp->Fitness(f);
         if (testFitness > prevFitness || Expression::RandomF() < Solver::GetTemp())
         {
             prevFitness = testFitness;
@@ -39,11 +40,11 @@ shared_ptr<Expression> ConstantMutator::Mutate(shared_ptr<Expression> exp)
         }
     }
 
-    if (prevFitness == exp->Fitness())
+    if (prevFitness > exp->Fitness() || Expression::RandomF() < Solver::GetTemp())
     {
-        return exp;
+        constantToMutate->m_k = bestK;
+        return tempExp;
     }
-    constantToMutate->m_k = bestK;
     return exp;
 }
 } // namespace SymbolicRegression

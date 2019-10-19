@@ -34,7 +34,7 @@ public:
 
     static shared_ptr<Expression> Initialize(shared_ptr<Expression> self, shared_ptr<Expression> parent);
 
-    shared_ptr<vector<shared_ptr<Expression>>> Collapse(shared_ptr<Expression> self);
+    shared_ptr<vector<shared_ptr<Expression>>> Collapse(const shared_ptr<Expression> &self) const;
     static shared_ptr<Expression> Simplify(shared_ptr<Expression> exp);
 
     static float RandomF();

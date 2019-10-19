@@ -230,7 +230,7 @@ bool Expression::IsValid(shared_ptr<Expression> exp)
     return valid;
 }
 
-shared_ptr<vector<shared_ptr<Expression>>> Expression::Collapse(shared_ptr<Expression> self)
+shared_ptr<vector<shared_ptr<Expression>>> Expression::Collapse(const shared_ptr<Expression> &self) const
 {
     shared_ptr<vector<shared_ptr<Expression>>> output(new vector<shared_ptr<Expression>>());
     output->push_back(self);

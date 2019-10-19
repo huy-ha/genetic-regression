@@ -8,6 +8,7 @@ using namespace std;
 
 shared_ptr<Expression> SubexpressionMutator::Mutate(shared_ptr<Expression> exp)
 {
+    auto tempExp = Expression::Copy(exp);
     auto collapsedExp = exp->Collapse(exp);
     vector<shared_ptr<Expression>> operators;
     copy_if(

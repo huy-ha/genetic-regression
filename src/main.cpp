@@ -33,7 +33,7 @@ int main(int argc, char **argv)
     srand(seed);
     try
     {
-        Config config(configFile, outputDir);
+        Config config(configFile + ".config", outputDir);
         // {
         //     auto exp = Expression::GenerateRandomExpression(0);
         //     cout << exp->ToString() << ":" << exp->Fitness() << endl;

@@ -8,7 +8,7 @@ using namespace std;
 class TrigMultiplierMutator
 {
 public:
-    static shared_ptr<Expression> Mutate(shared_ptr<Expression> exp);
+    static shared_ptr<Expression> Mutate(const shared_ptr<Expression> &exp);
 };
 } // namespace SymbolicRegression
 

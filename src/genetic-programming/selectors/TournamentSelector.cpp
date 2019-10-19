@@ -8,7 +8,7 @@ shared_ptr<Expression> TournamentSelector::DoTournament(const list<shared_ptr<Ex
     int populationCount = int(population.size());
     vector<int> playerIndices;
     vector<shared_ptr<Expression>> players;
-    Expression::Random(0, populationCount - 1, populationCount / 10, playerIndices);
+    Expression::Random(0, populationCount - 1, 4, playerIndices);
     int i = 0;
     for_each(population.begin(), population.end(), [&i, &playerIndices, &players](auto e) {
         if (find_if(

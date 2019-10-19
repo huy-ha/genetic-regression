@@ -12,12 +12,12 @@
 namespace SymbolicRegression
 {
 using namespace std;
-shared_ptr<Expression> TrigMultiplierMutator::Mutate(shared_ptr<Expression> exp)
+shared_ptr<Expression> TrigMultiplierMutator::Mutate(const shared_ptr<Expression> &exp)
 {
     float frequency, displacement, output_frequency, output_displacement;
     float prevFitness, testFitness;
     prevFitness = exp->Fitness();
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 10; i++)
     {
         if (exp->Depth() >= Config::GetInt("MaxDepth"))
         {
@@ -49,7 +49,6 @@ shared_ptr<Expression> TrigMultiplierMutator::Mutate(shared_ptr<Expression> exp)
     auto signalTerm = shared_ptr<Expression>(new Plus(0, variableTimesFrequency, displacementConstant));
 
     auto sinExpression = shared_ptr<Expression>(new Sin(0, signalTerm));
-    exp = shared_ptr<Expression>(new Multiply(0, sinExpression, exp));
-    return exp;
+    return shared_ptr<Expression>(new Multiply(0, sinExpression, exp));
 }
 } // namespace SymbolicRegression

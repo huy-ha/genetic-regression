@@ -31,7 +31,7 @@ Config::Config(string configFilePath, string outputFilePath)
     m_configs.insert(make_pair("DotPlot", "1"));
     m_configs.insert(make_pair("OutputPath", "runs/" + outputFilePath + "/"));
     Instance = this;
-    if (configFilePath != "")
+    if (configFilePath != ".config")
     {
         string buf;
         ifstream configFile;
