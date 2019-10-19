@@ -11,7 +11,7 @@
 #include <fstream>
 #include <windows.h>
 #include "../expression/Constant.hpp"
-
+#include <cmath>
 #include "GenerationalSolver.hpp"
 #include "ContinuousSolver.hpp"
 namespace SymbolicRegression
@@ -79,6 +79,42 @@ void Solver::InitializePopulation()
             m_population.emplace_front(newExp);
         }
     }
+}
+
+float Solver::PopulationDiversity()
+{
+    float diversitySum = 0;
+    int n = min(50, m_populationCount);
+    int m = min(10, m_populationCount);
+    int failedCalculations = 0;
+    for (int i = 0; i < n; i++)
+    {
+        vector<int> indices;
+        Expression::Random(0, m_populationCount - 1, 2, indices);
+        auto e1 = m_population.begin();
+        advance(e1, indices[0]);
+        // TODO calculate using SUS
+        for (int j = 0; j < m; j++)
+        {
+            auto e2 = m_population.begin();
+            advance(e2, indices[1]);
+            float tmp = Expression::Diversity(*e1, *e2);
+            if (isnan(tmp))
+            {
+                failedCalculations += 1;
+            }
+            else
+            {
+                diversitySum += tmp;
+            }
+
+            indices.pop_back();
+            Expression::Random(0, m_populationCount - 1, 1, indices);
+        }
+    }
+    if (failedCalculations == n * m)
+        return -1;
+    return diversitySum / (n * m - failedCalculations);
 }
 
 void Solver::SaveOutput()

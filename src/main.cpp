@@ -6,6 +6,10 @@
 #include "engine/OutputLogger.hpp"
 #include <chrono>
 
+#include "expression/Sin.hpp"
+#include "expression/Cos.hpp"
+#include "expression/Variable.hpp"
+
 using namespace std;
 using namespace std::chrono;
 using namespace SymbolicRegression;
@@ -35,10 +39,11 @@ int main(int argc, char **argv)
     {
         Config config(configFile + ".config", outputDir);
         // {
-        //     auto exp = Expression::GenerateRandomExpression(0);
-        //     cout << exp->ToString() << ":" << exp->Fitness() << endl;
-        //     exp = TrigMultiplierMutator::Mutate(exp);
-        //     cout << exp->ToString() << ":" << exp->Fitness() << endl;
+        //     auto varExp = shared_ptr<Expression>(new Variable(1));
+        //     auto e1 = shared_ptr<Expression>(new Sin(0, varExp));
+        //     auto e2 = shared_ptr<Expression>(new Sin(0, varExp));
+        //     cout << e1->ToString() << " + " << varExp->ToString() << endl;
+        //     cout << Expression::Diversity(e1, varExp) << endl;
         // }
         // return 0;
         OutputLogger::Log("Config", "Seed:" + to_string(seed));

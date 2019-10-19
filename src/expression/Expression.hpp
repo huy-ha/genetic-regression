@@ -60,6 +60,12 @@ public:
 
 public:
     /*
+    Diversity
+    */
+    static float Diversity(const shared_ptr<Expression> &e1, const shared_ptr<Expression> &e2);
+
+public:
+    /*
         EXPRESSION PREDICATES TO HELP WITH EXPRESSION SIMPLIFICATION
     */
     typedef function<bool(const shared_ptr<Expression> &)> ExpressionPredicate;

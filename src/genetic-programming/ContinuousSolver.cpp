@@ -64,6 +64,7 @@ void ContinuousSolver::Run()
         }
         DecayTemp();
         SavePopulationFitnesses();
+        cout << "Diversity:" << PopulationDiversity() << endl;
     }
     SaveOutput();
     m_population.sort(Expression::FitnessComparer);

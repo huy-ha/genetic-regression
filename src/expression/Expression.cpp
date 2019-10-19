@@ -13,6 +13,8 @@
 #include "../engine/OutputLogger.hpp"
 #include <typeinfo>
 #include "../genetic-programming/Solver.hpp"
+#include <chrono>
+#include <thread>
 namespace SymbolicRegression
 {
 using namespace std;
@@ -114,6 +116,19 @@ shared_ptr<Expression> Expression::Initialize(shared_ptr<Expression> self, share
         subexp->Initialize(subexp, self);
     });
     return self;
+}
+
+float Expression::Diversity(const shared_ptr<Expression> &e1, const shared_ptr<Expression> &e2)
+{
+    auto f1 = e1->ToFunction();
+    auto f2 = e2->ToFunction();
+    float stepSize = 0.5f;
+    float absErrSum = 0;
+    for (float x = 0.1f; x < 10; x += stepSize)
+    {
+        absErrSum += abs(f1(x) - f2(x));
+    }
+    return absErrSum;
 }
 
 shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
@@ -377,12 +392,17 @@ void Expression::Random(int min, int max, int count, vector<int> &output)
 {
     while (output.size() < count)
     {
-        int next = (int)RandomF((float)min, (float)max);
-        if (!any_of(output.begin(), output.end(), [=](auto x) {
-                return next == x;
-            }))
+        if (min == max)
+            output.push_back(min);
+        else
         {
-            output.push_back(next);
+            int next = (int)RandomF((float)min, (float)max);
+            if (!any_of(output.begin(), output.end(), [=](auto x) {
+                    return next == x;
+                }))
+            {
+                output.push_back(next);
+            }
         }
     }
 }

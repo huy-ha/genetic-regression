@@ -18,6 +18,7 @@ public:
     static float GetTemp();
     static void DecayTemp();
     void SavePopulationFitnesses();
+    float PopulationDiversity();
 
 protected:
     void InitializePopulation();
