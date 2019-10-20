@@ -118,17 +118,61 @@ shared_ptr<Expression> Expression::Initialize(shared_ptr<Expression> self, share
     return self;
 }
 
+static void CountSubexpressionTypes(const shared_ptr<Expression> &e, vector<int> &results)
+{
+    results.clear();
+    for (int i = 0; i < 8; i++)
+    {
+        results.push_back(0);
+    }
+    auto collapsed = e->Collapse(e);
+    for_each(collapsed->begin(), collapsed->end(), [&](auto subexp) {
+        if (EXPRESSION_TYPE(subexp) == CONSTANT_T)
+        {
+            results[0] += 1;
+        }
+        else if (EXPRESSION_TYPE(subexp) == VARIABLE_T)
+        {
+            results[1] += 1;
+        }
+        else if (EXPRESSION_TYPE(subexp) == SIN_T)
+        {
+            results[2] += 1;
+        }
+        else if (EXPRESSION_TYPE(subexp) == COS_T)
+        {
+            results[3] += 1;
+        }
+        else if (EXPRESSION_TYPE(subexp) == PLUS_T)
+        {
+            results[4] += 1;
+        }
+        else if (EXPRESSION_TYPE(subexp) == MINUS_T)
+        {
+            results[5] += 1;
+        }
+        else if (EXPRESSION_TYPE(subexp) == DIVIDE_T)
+        {
+            results[6] += 1;
+        }
+        else if (EXPRESSION_TYPE(subexp) == MULTIPLY_T)
+        {
+            results[7] += 1;
+        }
+    });
+}
+
 float Expression::Diversity(const shared_ptr<Expression> &e1, const shared_ptr<Expression> &e2)
 {
-    auto f1 = e1->ToFunction();
-    auto f2 = e2->ToFunction();
-    float stepSize = 0.5f;
-    float absErrSum = 0;
-    for (float x = 0.1f; x < 10; x += stepSize)
+    vector<int> e1subexp, e2subexp;
+    CountSubexpressionTypes(e1, e1subexp);
+    CountSubexpressionTypes(e2, e2subexp);
+    float diff = 0;
+    for (int i = 0; i < e1subexp.size(); i++)
     {
-        absErrSum += abs(f1(x) - f2(x));
+        diff += abs(e1subexp[i] - e2subexp[i]);
     }
-    return absErrSum;
+    return diff;
 }
 
 shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
