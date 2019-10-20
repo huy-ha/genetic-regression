@@ -30,6 +30,7 @@ protected:
     shared_ptr<Reproducer> m_reproducer;
     int m_eliteCount = -1;
     float m_prevHighestFitness = -1;
+    shared_ptr<Expression> m_prevBest;
     shared_ptr<Selector> m_selector;
 
 private:

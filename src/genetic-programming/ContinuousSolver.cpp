@@ -20,20 +20,14 @@ void ContinuousSolver::EvolveRound()
     // select two parents using selector
     auto [p1, p2] = m_selector->Select(m_population);
     // remove parents from population
-    // m_population.remove(p1);
-    // m_population.remove(p2);
+    m_population.remove(p1);
+    m_population.remove(p2);
     // reproduce the two parents, giving at least 2 individuals back as a list
     auto offspring = m_reproducer->CreateOffspring(p1, p2);
-    // cout << "CREATED " << offspring->ToString() << "||" << offspring->Fitness() << "||" << endl;
-    // cout << "\t" << p1->ToString() << "||" << p1->Fitness() << "||" << endl;
-    // cout << "\t" << p2->ToString() << "||" << p2->Fitness() << "||" << endl
-    //      << endl;
-    this_thread::sleep_for(chrono::microseconds(3000));
     if (!Expression::IsValid(offspring))
     {
         return;
     }
-    m_population.emplace_front(offspring);
     // concat individuals to population
     if (Expression::RandomF() > 0.5f)
     {
@@ -74,6 +68,17 @@ void ContinuousSolver::Run()
            prevBestEvaluations < OutputLogger::GetEvaluations() / 2)
     {
         EvolveRound();
+        for_each(m_population.begin(), m_population.end(), [](auto e) {
+            e = Expression::Simplify(e);
+        });
+        // Simplify and remove invalid expressions
+        auto it = m_population.begin();
+        while ((it = find_if(m_population.begin(), m_population.end(), [](auto e) -> bool {
+                    return !Expression::IsValid(e);
+                })) != m_population.end())
+        {
+            m_population.erase(it);
+        }
         if (OutputLogger::GetEvaluations() > saveEval * 100)
         {
             SaveOutput();
@@ -82,10 +87,11 @@ void ContinuousSolver::Run()
         m_population.sort(Expression::FitnessComparer);
         if ((*m_population.begin())->Fitness() > m_prevHighestFitness)
         {
-            m_prevHighestFitness = (*m_population.begin())->Fitness();
+            m_prevBest = (*m_population.begin());
+            m_prevHighestFitness = m_prevBest->Fitness();
             prevBestEvaluations = OutputLogger::GetEvaluations();
-            cout << "FITNESS: " << m_prevHighestFitness << " | Temp" << GetTemp() << endl;
-            cout << "\t" << (*m_population.begin())->ToString() << endl;
+            cout << "FITNESS: " << m_prevHighestFitness << " | Temp " << GetTemp() << endl;
+            cout << "\t" << m_prevBest->ToString() << endl;
         }
         DecayTemp();
         SavePopulationFitnesses();
@@ -94,10 +100,8 @@ void ContinuousSolver::Run()
                               "," + to_string(PopulationDiversity()));
     }
     SaveOutput();
-    m_population.sort(Expression::FitnessComparer);
-    auto finalBest = *m_population.begin();
     cout << "FITNESS " << m_prevHighestFitness
          << " after " << OutputLogger::GetEvaluations() << " evalutions at temp " << GetTemp() << endl;
-    cout << "\t" + finalBest->ToString() << endl;
+    cout << "\t" + m_prevBest->ToString() << endl;
 }
 } // namespace SymbolicRegression

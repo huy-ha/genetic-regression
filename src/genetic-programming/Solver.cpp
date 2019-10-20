@@ -9,6 +9,7 @@
 #include "reproducers/CrossoverMutatorReproducer.hpp"
 #include "selectors/TournamentSelector.hpp"
 #include "selectors/DiversitySelector.hpp"
+#include "selectors/NichingSelector.hpp"
 #include <fstream>
 #include <windows.h>
 #include "../expression/Constant.hpp"
@@ -43,6 +44,10 @@ Solver::Solver()
     if (selectorConfig == "Diversity")
     {
         m_selector = shared_ptr<Selector>(new DiversitySelector());
+    }
+    else if (selectorConfig == "Niching")
+    {
+        m_selector = shared_ptr<Selector>(new NichingSelector());
     }
     else
     {
