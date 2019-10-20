@@ -160,12 +160,10 @@ void Solver::SaveOutput()
 
 void Solver::SavePopulationFitnesses()
 {
-    string s = "";
-    s += to_string(OutputLogger::GetEvaluations()) + " ";
-    for_each(m_population.begin(), m_population.end(), [&s](auto e) {
-        s += to_string(e->Fitness()) + " ";
+    string evals = to_string(OutputLogger::GetEvaluations());
+    for_each(m_population.begin(), m_population.end(), [&evals](auto e) {
+        OutputLogger::Log("FitnessDotPlot", evals + "," + to_string(e->Fitness()));
     });
-    OutputLogger::Log("FitnessDotPlot", s);
 }
 
 float Solver::GetTemp()

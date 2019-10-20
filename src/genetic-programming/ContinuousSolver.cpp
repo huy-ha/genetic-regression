@@ -33,7 +33,7 @@ void ContinuousSolver::EvolveRound()
     {
         m_population.pop_back();
     }
-    OutputLogger::Log("HighestFitness", to_string(OutputLogger::GetEvaluations()) + " " + to_string(m_prevHighestFitness));
+    OutputLogger::Log("HighestFitness", to_string(OutputLogger::GetEvaluations()) + "," + to_string(m_prevHighestFitness));
 }
 
 void ContinuousSolver::Run()
@@ -64,7 +64,9 @@ void ContinuousSolver::Run()
         }
         DecayTemp();
         SavePopulationFitnesses();
-        cout << "Diversity:" << PopulationDiversity() << endl;
+        OutputLogger::Log("Diversity",
+                          to_string(OutputLogger::GetEvaluations()) +
+                              "," + to_string(PopulationDiversity()));
     }
     SaveOutput();
     m_population.sort(Expression::FitnessComparer);

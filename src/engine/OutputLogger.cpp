@@ -3,6 +3,7 @@
 #include <iostream>
 #include "../genetic-programming/Solver.hpp"
 #include <algorithm>
+#include <cstdarg>
 namespace SymbolicRegression
 {
 using namespace std;
@@ -22,6 +23,7 @@ OutputLogger::OutputLogger()
     m_log.insert(pair<string, string>("HighestFitness", ""));
     m_log.insert(pair<string, string>("FinalBest", ""));
     m_log.insert(pair<string, string>("FitnessDotPlot", ""));
+    m_log.insert(pair<string, string>("Diversity", ""));
 }
 
 shared_ptr<vector<string>> OutputLogger::GetKeys()
