@@ -4,6 +4,8 @@ import numpy as np
 import sys
 import math
 import os
+import csv
+import itertools
 
 
 def import_xy(filepath, tab=True):
@@ -66,6 +68,20 @@ def get_dir_name(runNumber):
                 return "runs/{}/".format(run)
     except:
         print("Run {} not found!".format(runNumber))
+
+
+def read_csv(filepath):
+    results = []
+    with open(filepath) as csvfile:
+        file = csv.reader(csvfile, delimiter=',')
+        colIter, _ = itertools.tee(file)
+        numCols = len(next(colIter))
+        for i in range(numCols):
+            results.append([])
+        for row in file:
+            for i in range(numCols):
+                results[i].append(float(row[i]))
+    return results
 
 
 def plot_final_best(filePath):
