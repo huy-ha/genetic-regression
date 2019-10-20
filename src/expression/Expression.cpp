@@ -33,7 +33,7 @@ Expression::ExpressionPredicate Expression::evaluatesToConstant = [](auto subexp
     float f0 = f(0);
     float f1 = f(1);
     float f2 = f(2);
-    if (f0 == f1 && f2 == f1)
+    if (abs(f0 - f1) < 0.1f && abs(f2 - f1) < 0.1f)
         return true;
     else
         return false;
@@ -222,11 +222,10 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
             auto replacementConstant = shared_ptr<Expression>(
                 new Constant(
                     (*it)->Level(),
-                    expToSimplify->ToFunction()(0)));
+                    expToSimplify->ToFunction()(1)));
             //no parent
             if (expToSimplify->Level() == 0)
             {
-
                 return replacementConstant;
             }
             else
@@ -271,6 +270,8 @@ bool Expression::IsValid(shared_ptr<Expression> exp)
     if (isnan(f(0)))
         return false;
     else if (EXPRESSION_TYPE(exp) == CONSTANT_T)
+        return false;
+    else if (exp->Depth() > Config::GetInt("MaxDepth"))
         return false;
     return true;
 }
