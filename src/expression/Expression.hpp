@@ -123,11 +123,6 @@ protected:
                 }
             }
         }
-        else
-        {
-            cout << "\nPARENT EXPIRED" << e1->ToString() << endl
-                 << endl;
-        }
     }
 
     inline void RecalculateLevels(int level)

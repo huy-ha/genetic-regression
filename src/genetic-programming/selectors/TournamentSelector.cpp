@@ -1,14 +1,20 @@
 #include "TournamentSelector.hpp"
 #include "../../expression/Expression.hpp"
+#include "../../engine/Config.hpp"
 namespace SymbolicRegression
 {
+
+TournamentSelector::TournamentSelector() : Selector()
+{
+    m_numPlayers = Config::GetInt("TournamentPlayersCount");
+}
 
 shared_ptr<Expression> TournamentSelector::DoTournament(const list<shared_ptr<Expression>> &population)
 {
     int populationCount = int(population.size());
     vector<int> playerIndices;
     vector<shared_ptr<Expression>> players;
-    Expression::Random(0, populationCount - 1, 4, playerIndices);
+    Expression::Random(0, populationCount - 1, m_numPlayers, playerIndices);
     int i = 0;
     for_each(population.begin(), population.end(), [&i, &playerIndices, &players](auto e) {
         if (find_if(
@@ -18,7 +24,6 @@ shared_ptr<Expression> TournamentSelector::DoTournament(const list<shared_ptr<Ex
                     return j == i;
                 }) != playerIndices.end())
         {
-            i += 1;
             players.push_back(e);
         }
         i += 1;

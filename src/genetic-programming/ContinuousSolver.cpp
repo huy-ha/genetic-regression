@@ -1,6 +1,8 @@
 #include "ContinuousSolver.hpp"
 #include "../engine/Config.hpp"
 #include "../engine/OutputLogger.hpp"
+#include <chrono>
+#include <thread>
 namespace SymbolicRegression
 {
 using namespace std;
@@ -18,15 +20,38 @@ void ContinuousSolver::EvolveRound()
     // select two parents using selector
     auto [p1, p2] = m_selector->Select(m_population);
     // remove parents from population
-    m_population.remove(p1);
-    m_population.remove(p2);
+    // m_population.remove(p1);
+    // m_population.remove(p2);
     // reproduce the two parents, giving at least 2 individuals back as a list
     auto offspring = m_reproducer->CreateOffspring(p1, p2);
-    // concat individuals to population
-    // TODO experiment with replace most similar parent
+    // cout << "CREATED " << offspring->ToString() << "||" << offspring->Fitness() << "||" << endl;
+    // cout << "\t" << p1->ToString() << "||" << p1->Fitness() << "||" << endl;
+    // cout << "\t" << p2->ToString() << "||" << p2->Fitness() << "||" << endl
+    //      << endl;
+    this_thread::sleep_for(chrono::microseconds(3000));
+    if (!Expression::IsValid(offspring))
+    {
+        return;
+    }
     m_population.emplace_front(offspring);
-    m_population.emplace_front(p1);
-    m_population.emplace_front(p2);
+    // concat individuals to population
+    if (Expression::RandomF() > 0.5f)
+    {
+        m_population.emplace_front(offspring);
+        m_population.emplace_front(p2);
+        m_population.emplace_front(p1);
+    }
+    else if (Expression::Diversity(offspring, p1) < Expression::Diversity(offspring, p2))
+    {
+        m_population.emplace_front(offspring);
+        m_population.emplace_front(p2);
+    }
+    else
+    {
+        m_population.emplace_front(offspring);
+        m_population.emplace_front(p1);
+    }
+    // remove all invalid expressions
     // handle over population
     m_population.sort(Expression::FitnessComparer);
     while (m_population.size() > m_populationCount)

@@ -23,7 +23,7 @@ shared_ptr<Expression> *CrossoverMutatorReproducer::FindCrossoverPoint(shared_pt
         collapsedSubExp->end(),
         back_inserter(operators),
         [&](auto e) {
-            return e->Order() > 0 && e->Depth() < (maxDepth - 1);
+            return e->Order() > 0;
         });
     if (operators.size() == 0)
         return nullptr;
@@ -53,15 +53,15 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
         child = ConstantMutator::Mutate(child);
         child = ConstantMultiplierMutator::Mutate(child);
 
-        if (Expression::RandomF() > 0.9999f)
+        if (Expression::RandomF() > 0.999f)
         {
             child = TrigMultiplierMutator::Mutate(child);
         }
-        else if (Expression::RandomF() > 0.99f)
+        else if (Expression::RandomF() > 0.999f)
         {
             child = SubexpressionMutator::Mutate(child);
         }
-        else if (Expression::RandomF() > 0.99f)
+        else if (Expression::RandomF() > 0.999f)
         {
             child = TruncateMutator::Mutate(child);
         }
@@ -71,9 +71,9 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
             return child;
         }
         // child needs to be better than one of the parents
-    } while (child->Fitness() < p1->Fitness() &&
+    } while (child->Fitness() < p1->Fitness() ||
              child->Fitness() < p2->Fitness());
-    return child;
+    return Expression::Simplify(child);
 }
 
 } // namespace SymbolicRegression

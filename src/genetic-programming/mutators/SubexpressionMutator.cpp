@@ -25,7 +25,7 @@ shared_ptr<Expression> SubexpressionMutator::Mutate(shared_ptr<Expression> exp)
     auto expToChange = operators[int(Expression::RandomF(0, 100)) % operators.size()];
 
     // change a random subexpression of the operator
-    expToChange->m_subexpressions[int(Expression::RandomF(0, float(expToChange->Order()) - 1.0f))] = Expression::GenerateRandomExpression(expToChange->Level() + 1);
+    expToChange->m_subexpressions[int(Expression::RandomF(0, float(expToChange->Order() - 1)))] = Expression::GenerateRandomExpression(expToChange->Level() + 1);
 
     return exp;
 }

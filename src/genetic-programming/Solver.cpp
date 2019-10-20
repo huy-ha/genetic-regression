@@ -8,6 +8,7 @@
 #include "reproducers/MutatorReproducer.hpp"
 #include "reproducers/CrossoverMutatorReproducer.hpp"
 #include "selectors/TournamentSelector.hpp"
+#include "selectors/DiversitySelector.hpp"
 #include <fstream>
 #include <windows.h>
 #include "../expression/Constant.hpp"
@@ -39,7 +40,15 @@ Solver::Solver()
         m_reproducer = shared_ptr<Reproducer>(new RandomReproducer(m_populationCount));
     }
     string selectorConfig = Config::GetString("Selector");
-    m_selector = shared_ptr<Selector>(new TournamentSelector());
+    if (selectorConfig == "Diversity")
+    {
+        m_selector = shared_ptr<Selector>(new DiversitySelector());
+    }
+    else
+    {
+        m_selector = shared_ptr<Selector>(new TournamentSelector());
+    }
+
     collectDataForDotPlot = Config::GetInt("DotPlot");
 }
 
@@ -83,38 +92,20 @@ void Solver::InitializePopulation()
 
 float Solver::PopulationDiversity()
 {
+    int n = int(m_population.size());
     float diversitySum = 0;
-    int n = min(50, m_populationCount);
-    int m = min(10, m_populationCount);
-    int failedCalculations = 0;
     for (int i = 0; i < n; i++)
     {
-        vector<int> indices;
-        Expression::Random(0, m_populationCount - 1, 2, indices);
-        auto e1 = m_population.begin();
-        advance(e1, indices[0]);
-        // TODO calculate using SUS
-        for (int j = 0; j < m; j++)
+        for (int j = i + 1; j < n; j++)
         {
+            auto e1 = m_population.begin();
+            advance(e1, i);
             auto e2 = m_population.begin();
-            advance(e2, indices[1]);
-            float tmp = Expression::Diversity(*e1, *e2);
-            if (isnan(tmp))
-            {
-                failedCalculations += 1;
-            }
-            else
-            {
-                diversitySum += tmp;
-            }
-
-            indices.pop_back();
-            Expression::Random(0, m_populationCount - 1, 1, indices);
+            advance(e2, j);
+            diversitySum += Expression::Diversity(*e1, *e2);
         }
     }
-    if (failedCalculations == n * m)
-        return -1;
-    return diversitySum / (n * m - failedCalculations);
+    return diversitySum * 0.0001f / n * n;
 }
 
 void Solver::SaveOutput()

@@ -235,29 +235,29 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
             }
         }
         // 4. check for nested trig functions
-        // else if ((it = FindFirst(operators, isTrigFunction, [](auto subexp) {
-        //               return AnySubExpression(subexp, isTrigFunction);
-        //           })) != operators.end())
-        // {
-        //     auto expToSimplify = (*it);
+        else if ((it = FindFirst(operators, isTrigFunction, [](auto subexp) {
+                      return AnySubExpression(subexp, isTrigFunction);
+                  })) != operators.end())
+        {
+            auto expToSimplify = (*it);
 
-        //     // replace with constant at same level and of the same size
-        //     auto randConstExpression = shared_ptr<Expression>(
-        //         new Constant(expToSimplify->Level()));
-        //     auto variableExprssion = shared_ptr<Expression>(
-        //         new Variable(expToSimplify->Level()));
-        //     auto replacementExp = shared_ptr<Expression>(
-        //         new Multiply((*it)->Level(), randConstExpression, variableExprssion));
-        //     //no parent
-        //     if (expToSimplify->Level() == 0)
-        //     {
-        //         return replacementExp;
-        //     }
-        //     else
-        //     {
-        //         ReplaceExpression(expToSimplify, replacementExp);
-        //     }
-        // }
+            // replace with constant at same level and of the same size
+            auto randConstExpression = shared_ptr<Expression>(
+                new Constant(expToSimplify->Level()));
+            auto variableExprssion = shared_ptr<Expression>(
+                new Variable(expToSimplify->Level()));
+            auto replacementExp = shared_ptr<Expression>(
+                new Multiply((*it)->Level(), randConstExpression, variableExprssion));
+            //no parent
+            if (expToSimplify->Level() == 0)
+            {
+                return replacementExp;
+            }
+            else
+            {
+                ReplaceExpression(expToSimplify, replacementExp);
+            }
+        }
         else
         {
             return exp;
@@ -267,26 +267,12 @@ shared_ptr<Expression> Expression::Simplify(shared_ptr<Expression> exp)
 
 bool Expression::IsValid(shared_ptr<Expression> exp)
 {
-    string prefix = "class SymbolicRegression::";
-    auto collapsedSubExp = exp->Collapse(exp);
-    vector<shared_ptr<Expression>> divides;
-    copy_if(
-        collapsedSubExp->begin(),
-        collapsedSubExp->end(),
-        back_inserter(divides),
-        [&](auto e) {
-            return string(typeid(*e).name()) == string(prefix + "Divide");
-        });
-    bool valid = divides.size() == 0 || !any_of(divides.begin(), divides.end(), [&](const shared_ptr<Expression> &divide) {
-                     string typeName = typeid(*(divide->m_subexpressions[1])).name();
-                     return typeName == (prefix + "Variable") ||
-                            typeName == (prefix + "Sin") ||
-                            typeName == (prefix + "Cos");
-                 });
-
-    // 2. ROOT NODE CAN'T BE CONSTANT
-    valid = !(EXPRESSION_TYPE(exp) == CONSTANT_T) && valid;
-    return valid;
+    auto f = exp->ToFunction();
+    if (isnan(f(0)))
+        return false;
+    else if (EXPRESSION_TYPE(exp) == CONSTANT_T)
+        return false;
+    return true;
 }
 
 shared_ptr<vector<shared_ptr<Expression>>> Expression::Collapse(const shared_ptr<Expression> &self) const

@@ -50,7 +50,6 @@ void OutputLogger::IncrementEvaluations()
 {
     lock_guard<mutex> lock(evalMu);
     Evaluations = Evaluations + 1;
-    // cout << "eval: " << Evaluations << endl;
 }
 
 void OutputLogger::Log(string key, string log)
