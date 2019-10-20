@@ -8,41 +8,6 @@ import csv
 import itertools
 
 
-def import_xy(filepath, tab=True):
-    points = []
-    if tab:
-        points = [x.split('\t')
-                  for x in open(filepath, "r").readlines()]
-    else:
-        points = [x.split(' ')
-                  for x in open(filepath, "r").readlines()]
-    x = []
-    y = []
-    for point in points:
-        x.append(float(point[0]))
-        y.append(float(point[1]))
-    return x, y, filepath
-
-
-def import_dotplot(filepath):
-    evals = []
-    fitnesses = []
-    lines = open(filepath, "r").readlines()
-    for line in lines:
-        splitted = line.split(' ')
-        if '\n' in splitted:
-            splitted.remove('\n')
-        evals.append(float(splitted.pop(0)))
-        fitnesses.append([float(x) for x in splitted])
-    x = []
-    y = []
-    for i in range(len(evals)):
-        for j in range(len(fitnesses[i])):
-            x.append(evals[i])
-            y.append(fitnesses[i][j])
-    return x, y
-
-
 def import_finalbest(filepath):
     f = open(filepath, "r")
     lines = f.readlines()
@@ -70,10 +35,10 @@ def get_dir_name(runNumber):
         print("Run {} not found!".format(runNumber))
 
 
-def read_csv(filepath):
+def read_csv(filepath, d=','):
     results = []
     with open(filepath) as csvfile:
-        file = csv.reader(csvfile, delimiter=',')
+        file = csv.reader(csvfile, delimiter=d)
         colIter, _ = itertools.tee(file)
         numCols = len(next(colIter))
         for i in range(numCols):
@@ -85,9 +50,11 @@ def read_csv(filepath):
 
 
 def plot_final_best(filePath):
-    x, y, filepath, eqn = import_finalbest(filePath)
+    x, y, filepath, eqn = import_finalbest(filePath + "FinalBest.txt")
     plt.scatter(x, y, label=eqn)
-    x, y, title = import_xy('inputs/data.txt')
+    dataset = read_csv('inputs/data.txt', '\t')
+    x = dataset[0]
+    y = dataset[1]
     plt.scatter(x, y, label='dataset')
     plt.legend()
     plt.title(eqn)
@@ -95,23 +62,39 @@ def plot_final_best(filePath):
 
 
 def plot_highest_fitness(filepath):
-    x, y, title = import_xy(filepath, False)
-    plt.plot(x, y)
+    file = read_csv(filepath + "HighestFitness.txt")
+    evals = file[0]
+    fitnesses = file[1]
+    plt.plot(evals, fitnesses)
     plt.title("Highest Fitness")
     plt.show()
 
 
+def plot_diversity(dirpath):
+    csvfile = read_csv(dirpath + "Diversity.txt")
+    evaluations = csvfile[0]
+    diversity = csvfile[1]
+    plt.plot(evaluations, diversity)
+    plt.ylabel('Diversity')
+    plt.xlabel('Evaluations')
+    plt.title("Diversity")
+    plt.show()
+
+
 def plot_fitness_dotplot(filepath):
-    x, y = import_dotplot(filepath)
-    plt.scatter(x, y)
+    file = read_csv(filepath + "FitnessDotPlot.txt")
+    evals = file[0]
+    fitnesses = file[1]
+    plt.scatter(evals, fitnesses)
     plt.title("Fitness Dot Plot")
     plt.show()
 
 
 def plot_dir(dir):
-    # plot_final_best(dirname + "FinalBest.txt")
-    plot_fitness_dotplot(dirname + "FitnessDotPlot.txt")
-    # plot_highest_fitness(dirname + "HighestFitness.txt")
+    plot_final_best(dir)
+    plot_fitness_dotplot(dir)
+    plot_diversity(dir)
+    plot_highest_fitness(dir)
 
 
 if __name__ == "__main__":
