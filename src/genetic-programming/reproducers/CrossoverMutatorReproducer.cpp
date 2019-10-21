@@ -84,8 +84,7 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
         {
             return bestChildSoFar;
         }
-        // child needs to be better than both of the parents
-    } while (bestChildSoFar->Fitness() < p1->Fitness() ||
+    } while (bestChildSoFar->Fitness() < p1->Fitness() &&
              bestChildSoFar->Fitness() < p2->Fitness());
     return bestChildSoFar;
 }

@@ -13,6 +13,15 @@ shared_ptr<Expression> TournamentSelector::DoTournament(const list<shared_ptr<Ex
 {
     int populationCount = int(population.size());
     vector<shared_ptr<Expression>> players;
+    if (m_numPlayers == population.size())
+    {
+        return *max_element(population.begin(), population.end(), Expression::FitnessComparer);
+    }
+    else if (m_numPlayers > population.size())
+    {
+        cout << "ERROR:PARENTS LESS THAN TOURNAMNET SIZE" << endl;
+        throw exception();
+    }
     while (players.size() < m_numPlayers)
     {
         auto it = population.begin();
@@ -34,6 +43,15 @@ shared_ptr<Expression> TournamentSelector::DoTournament(const list<shared_ptr<Ex
 tuple<shared_ptr<Expression>, shared_ptr<Expression>> TournamentSelector::Select(
     const list<shared_ptr<Expression>> &population)
 {
+    if (population.size() == 2)
+    {
+        return make_tuple(population.front(), population.back());
+    }
+    else if (population.size() < 2)
+    {
+        cout << "ERROR: POPULATION TOO SMALL" << endl;
+        throw exception();
+    }
     list<shared_ptr<Expression>> parents = list<shared_ptr<Expression>>(population.begin(), population.end());
     shared_ptr<Expression> p2,
         p1 = DoTournament(parents);
