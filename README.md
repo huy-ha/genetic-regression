@@ -94,9 +94,13 @@ Random Search is a special case of a Evolutionary Algorithm with the only constr
 As you would expect, the dot plot shows an almost uniform distribution of fitnesses, which suggests great diversity. This is confirmed by the diversity plot. The learning curve is abrupt, as expected. What you would not expect is for a random search to do so well. Most of the final best equations were able to capture the shapes of the dataset quite well.
 
 <div style="clear:both;">
-	<img src="assets\rs\eqn2.png"width="30%" height="auto" />
-	<img src="assets\rs\eqn4.png"width="30%" height="auto" />
-	<img src="assets\rs\eqn1.png"width="30%" height="auto" />
+	<img src="assets\rs\eqn1.png"width="49%" height="auto" />
+	<img src="assets\rs\eqn2.png"width="49%" height="auto" />
+</div>
+
+<div style="clear:both;">
+	<img src="assets\rs\eqn3.png"width="49%" height="auto" />
+	<img src="assets\rs\eqn4.png"width="49%" height="auto" />
 </div>
 
 # 3. Hill Climber
@@ -104,6 +108,27 @@ As you would expect, the dot plot shows an almost uniform distribution of fitnes
 ## Description
 
 Similar to Random Search, Hill Climbers are just a special case of Evoluationary Algorithms, with population 1, simulated annealing with initial temperature set to 0, and a 100% mutation rate. In this case, it doesn't matter if the solver is generational or continuous, because only one individual is reproducing, and the individual is reproducing asexually.
+
+## Plots
+
+### Learning Plot and Diversity Plot (Respectively)
+
+<div style="clear:both;">
+    <img src="assets\hc\lc.png"width="49%" height="auto" />
+	<img src="assets\hc\diversity.png"width="49%" height="auto" />
+</div>
+
+As you would expect, the dot plot shows an almost uniform distribution of fitnesses, which suggests great diversity. This is confirmed by the diversity plot. The learning curve is abrupt, as expected. What you would not expect is for a random search to do so well. Most of the final best equations were able to capture the shapes of the dataset quite well.
+
+<div style="clear:both;">
+	<img src="assets\hc\eqn1.png"width="49%" height="auto" />
+	<img src="assets\hc\eqn2.png"width="49%" height="auto" />
+</div>
+
+<div style="clear:both;">
+	<img src="assets\hc\eqn3.png"width="49%" height="auto" />
+	<img src="assets\hc\eqn4.png"width="49%" height="auto" />
+</div>
 
 # 4. Evolutionary Algorithm
 
