@@ -34,6 +34,8 @@ shared_ptr<Expression> *CrossoverMutatorReproducer::FindCrossoverPoint(shared_pt
 shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_ptr<Expression> p1, const shared_ptr<Expression> p2)
 {
     shared_ptr<Expression> child;
+    shared_ptr<Expression> bestChildSoFar;
+    int attempts;
     do
     {
         child = Expression::Copy(p1);
@@ -67,15 +69,25 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
         {
             child = TruncateMutator::Mutate(child);
         }
+        child = Expression::Simplify(child);
 
         if (Expression::RandomF() < Solver::GetTemp())
         {
             return child;
         }
-        // child needs to be better than one of the parents
-    } while (child->Fitness() < p1->Fitness() ||
-             child->Fitness() < p2->Fitness());
-    return Expression::Simplify(child);
+        if (!bestChildSoFar || child->Fitness() > bestChildSoFar->Fitness())
+        {
+            bestChildSoFar = child;
+        }
+        attempts += 1;
+        if (attempts > 100)
+        {
+            return bestChildSoFar;
+        }
+        // child needs to be better than both of the parents
+    } while (bestChildSoFar->Fitness() < p1->Fitness() ||
+             bestChildSoFar->Fitness() < p2->Fitness());
+    return bestChildSoFar;
 }
 
 } // namespace SymbolicRegression
