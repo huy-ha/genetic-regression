@@ -15,7 +15,7 @@ public:
     Reproducer(int populationCount);
     shared_ptr<list<shared_ptr<Expression>>> AsyncReproduce(
         const list<shared_ptr<Expression>> &parents);
-    shared_ptr<list<shared_ptr<Expression>>> Reproduce(
+    virtual shared_ptr<list<shared_ptr<Expression>>> Reproduce(
         const list<shared_ptr<Expression>> &parents);
     virtual shared_ptr<Expression> CreateOffspring(
         const shared_ptr<Expression> p1, const shared_ptr<Expression> p2) = 0;
