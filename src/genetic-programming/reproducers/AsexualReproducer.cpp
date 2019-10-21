@@ -25,28 +25,28 @@ shared_ptr<list<shared_ptr<Expression>>> AsexualReproducer::Reproduce(
             offspring = ConstantMutator::Mutate(offspring);
             if (Expression::RandomF() > 0.7f)
             {
-                //cout  << "cons mult" << endl;
                 offspring = ConstantMultiplierMutator::Mutate(offspring);
             }
             if (Expression::RandomF() > 0.7f)
             {
-                //cout  << "trig mult" << endl;
                 offspring = TrigMultiplierMutator::Mutate(offspring);
             }
             if (Expression::RandomF() > 0.7f)
             {
-                //cout  << "subexp" << endl;
                 offspring = SubexpressionMutator::Mutate(offspring);
             }
             if (Expression::RandomF() > 0.7f)
             {
-                //cout  << "truncate" << endl;
                 offspring = TruncateMutator::Mutate(offspring);
             }
             attempts += 1;
+            if (attempts > 1000)
+            {
+                m_offsprings.insert(make_pair((*parent)->ToString(), *parent));
+                break;
+            }
         } while (offspring->Fitness() < (*parent)->Fitness() ||
-                 Expression::RandomF() < Solver::GetTemp() ||
-                 attempts > 1000000);
+                 Expression::RandomF() < Solver::GetTemp());
         if (Expression::IsValid(offspring) && m_offsprings.find(offspring->ToString()) == m_offsprings.end())
         {
             m_offsprings.insert(make_pair(offspring->ToString(), offspring));

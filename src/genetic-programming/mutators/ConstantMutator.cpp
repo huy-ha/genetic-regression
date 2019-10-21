@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "../../expression/Constant.hpp"
 #include "../Solver.hpp"
+#include "../../engine/Config.hpp"
 
 namespace SymbolicRegression
 {
@@ -29,7 +30,7 @@ shared_ptr<Expression> ConstantMutator::Mutate(const shared_ptr<Expression> &exp
     float k, bestK;
     float prevFitness = tempExp->Fitness();
     float testFitness = -1;
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < Config::GetInt("MutationRetries"); i++)
     {
         auto f = [=](float x) { return k; };
         testFitness = tempExp->Fitness(f);

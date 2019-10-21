@@ -6,6 +6,8 @@
 #include "reproducers/Reproducer.hpp"
 #include "selectors/Selector.hpp"
 #include "../engine/OutputLogger.hpp"
+#include <ctime>
+#include <chrono>
 namespace SymbolicRegression
 {
 using namespace std;

@@ -24,6 +24,7 @@ Config::Config(string configFilePath, string outputFilePath)
 
     m_configs.insert(make_pair("Init_T", "0.5"));
     m_configs.insert(make_pair("T_decay", "0.999999"));
+    m_configs.insert(make_pair("MutationRetries", "1"));
 
     m_configs.insert(make_pair("PopulationCount", "100"));
     m_configs.insert(make_pair("GenerationCount", "50000"));
