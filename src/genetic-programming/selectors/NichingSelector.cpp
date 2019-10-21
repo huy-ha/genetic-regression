@@ -10,9 +10,11 @@ tuple<shared_ptr<Expression>, shared_ptr<Expression>> NichingSelector::Select(
     int attempt = 0;
     while (true)
     {
+        cout << "\tNiching trying " << threshold << endl;
         auto [p1, p2] = m_tournamentSelector.Select(population);
         if (Expression::Diversity(p1, p2) < threshold || attempt > 50)
         {
+            cout << "Niching DONE " << threshold << endl;
             return make_tuple(p1, p2);
         }
         attempt += 1;

@@ -419,24 +419,6 @@ float Expression::RandomF(float min, float max)
     return (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * (max - min) + min;
 }
 
-void Expression::Random(int min, int max, int count, vector<int> &output)
-{
-    while (output.size() < count)
-    {
-        if (min == max)
-            output.push_back(min);
-        else
-        {
-            int next = (int)RandomF((float)min, (float)max);
-            if (!any_of(output.begin(), output.end(), [=](auto x) {
-                    return next == x;
-                }))
-            {
-                output.push_back(next);
-            }
-        }
-    }
-}
 int Expression::Depth() const
 {
     if (m_order == 0)

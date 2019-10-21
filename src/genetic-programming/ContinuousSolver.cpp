@@ -19,8 +19,10 @@ void ContinuousSolver::EvolveRound()
     }
     else
     {
+        cout << "selecting ..." << endl;
         // select two parents using selector
         auto [p1, p2] = m_selector->Select(m_population);
+        cout << "done selecting" << endl;
         // remove parents from population
         m_population.remove(p1);
         m_population.remove(p2);
@@ -37,14 +39,23 @@ void ContinuousSolver::EvolveRound()
             m_population.emplace_front(p2);
             m_population.emplace_front(p1);
         }
-        else if (Expression::Diversity(offspring, p1) < Expression::Diversity(offspring, p2))
+        // else if (Expression::Diversity(offspring, p1) < Expression::Diversity(offspring, p2))
+        else if (offspring->Fitness() > p1->Fitness() && offspring->Fitness() > p2->Fitness())
         {
-            m_population.emplace_front(offspring);
-            m_population.emplace_front(p2);
+            if (p1->Fitness() > p2->Fitness())
+            {
+                m_population.emplace_front(offspring);
+                m_population.emplace_front(p1);
+            }
+            else
+            {
+                m_population.emplace_front(offspring);
+                m_population.emplace_front(p2);
+            }
         }
         else
         {
-            m_population.emplace_front(offspring);
+            m_population.emplace_front(p2);
             m_population.emplace_front(p1);
         }
         // remove all invalid expressions
@@ -70,6 +81,7 @@ void ContinuousSolver::Run()
     // Afterwards, if double evaluations without getting better, quit
     while (round < 10000 || !ShouldStop())
     {
+        cout << "ROUND #" << round << endl;
         EvolveRound();
         for_each(m_population.begin(), m_population.end(), [](auto e) {
             e = Expression::Simplify(e);
@@ -94,6 +106,7 @@ void ContinuousSolver::Run()
         OutputLogger::Log("Diversity",
                           to_string(OutputLogger::GetEvaluations()) +
                               "," + to_string(PopulationDiversity()));
+        round += 1;
     }
     SaveOutput();
     cout << "FITNESS " << m_prevHighestFitness

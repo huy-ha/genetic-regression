@@ -35,7 +35,7 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
 {
     shared_ptr<Expression> child;
     shared_ptr<Expression> bestChildSoFar;
-    int attempts;
+    int attempts = 0;
     do
     {
         child = Expression::Copy(p1);
@@ -53,19 +53,19 @@ shared_ptr<Expression> CrossoverMutatorReproducer::CreateOffspring(const shared_
             *cross1 = Expression::Copy(*cross2);
         }
         child = ConstantMutator::Mutate(child);
-        if (Expression::RandomF() > 0.9f)
+        if (Expression::RandomF() > 0.8f)
         {
             child = ConstantMultiplierMutator::Mutate(child);
         }
-        else if (Expression::RandomF() > 0.9f)
+        if (Expression::RandomF() > 0.8f)
         {
             child = TrigMultiplierMutator::Mutate(child);
         }
-        else if (Expression::RandomF() > 0.9f)
+        if (Expression::RandomF() > 0.8f)
         {
             child = SubexpressionMutator::Mutate(child);
         }
-        else if (Expression::RandomF() > 0.9f)
+        if (Expression::RandomF() > 0.8f)
         {
             child = TruncateMutator::Mutate(child);
         }
