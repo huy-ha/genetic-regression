@@ -31,8 +31,11 @@ def get_dir_name(runNumber):
         for run in runs:
             if run.find("run{}".format(runNumber)) is not -1:
                 return "runs/{}/".format(run)
+            else:
+                exit()
     except:
         print("Run {} not found!".format(runNumber))
+        exit()
 
 
 def read_csv(filepath, d=','):
@@ -40,6 +43,8 @@ def read_csv(filepath, d=','):
     with open(filepath) as csvfile:
         file = csv.reader(csvfile, delimiter=d)
         colIter, _ = itertools.tee(file)
+        if not any(colIter):
+            return None
         numCols = len(next(colIter))
         for i in range(numCols):
             results.append([])
@@ -63,6 +68,9 @@ def plot_final_best(filePath):
 
 def plot_highest_fitness(filepath):
     file = read_csv(filepath + "HighestFitness.txt")
+    if file is None:
+        print("Can't plot highest fitness")
+        return
     evals = file[0]
     fitnesses = file[1]
     plt.plot(evals, fitnesses)
@@ -72,6 +80,9 @@ def plot_highest_fitness(filepath):
 
 def plot_diversity(dirpath):
     csvfile = read_csv(dirpath + "Diversity.txt")
+    if csvfile is None:
+        print("Can't plot diversity")
+        return
     evaluations = csvfile[0]
     diversity = csvfile[1]
     plt.plot(evaluations, diversity)
@@ -83,9 +94,12 @@ def plot_diversity(dirpath):
 
 def plot_fitness_dotplot(filepath):
     file = read_csv(filepath + "FitnessDotPlot.txt")
+    if file is None:
+        print("Can't plot dotplot")
+        return
     evals = file[0]
     fitnesses = file[1]
-    plt.scatter(evals, fitnesses)
+    plt.scatter(evals, fitnesses, s=0.05)
     plt.title("Fitness Dot Plot")
     plt.show()
 
@@ -97,7 +111,37 @@ def plot_dir(dir):
     plot_highest_fitness(dir)
 
 
+def avg_learning_curve(runpaths, label):
+    evals = []
+    fitnesses = []
+    minLen = 10000000000
+    for runpath in runpaths:
+        run = read_csv(runpath)
+        evals.append(run[0])
+        fitnesses.append(run[1])
+        if len(run[0]) < minLen:
+            minLen = len(run[0])
+    for i in range(len(evals)):
+        evals[i] = evals[i][0:minLen]
+        fitnesses[i] = fitnesses[i][0:minLen]
+    n_sqrt = math.sqrt(len(runpaths))
+    evals = np.mean(evals, axis=0)
+    std = np.std(fitnesses, axis=0)
+    fitnesses = np.mean(fitnesses, axis=0)
+    plt.errorbar(evals, fitnesses, yerr=std,
+                 errorevery=10000, label=label)
+    plt.legend()
+    plt.show()
+
+
+rs_runs = ["runs/run45-rs/HighestFitness.txt",
+           "runs/run46-rs/HighestFitness.txt",
+           "runs/run47-rs/HighestFitness.txt",
+           "runs/run48-rs/HighestFitness.txt",
+           "runs/run49-rs/HighestFitness.txt"]
+
 if __name__ == "__main__":
+    # avg_learning_curve(rs_runs, "Random Search")
     # Parse Arguments
     parser = argparse.ArgumentParser(description='Plot a run')
     parser.add_argument(
