@@ -25,43 +25,37 @@ Grace Hours left: 75 hours
 
 ## TODO
 
-- Deterministic Crowding child elitism
-- Partial Dataset (slowly increase percentage of training dataset)
+- All performance curves in one plot
+- Include all GA configs
 
-* Diversity (How to maintain, increase, similarity mectric)
-* Refactor plotter.py for general performance plots (Dot plot, convergence plot)
-  - Specify in the run which data want to collect (no data, default to collecting fitness, option to collect all data for dot plot)
-* All performance curves in one plot
-* Results summary in table format
-* Include all GA configs
+- Result page showing information requested
+- Code included (8pt courier single spacing)
+- Convergence plot for any one of the methods
+- Plot showing accuracy vs complexity (of all evaluations
+- Description of EA variation operators used
+- Description of EA selection methods used
+- Analysis of performance. Did it work? Why or why not?
+- Learning curve of GP
+- Learning curve of some variation of the GP
+- learning curves have error bars
+- Overall correctness of the result
+- Overall efficiency of the algorithm (accuracy versus number of evaluations)
+- Automatically draw tree representing best solution
+- Show video where every frame is data point and best function found so far (include \* link to video online in the PDF, along with a frame from the video)
 
-* Result page showing information requested
-* Code included (8pt courier single spacing)
-* Dot plot for any one of the methods
-* Diversity plot for any one of the methods
-* Convergence plot for any one of the methods
-* Plot showing accuracy vs complexity (of all evaluations
-* Description of hill climber
-* Description of EA variation operators used
-* Description of EA selection methods used
-* Analysis of performance. Did it work? Why or why not?
-* Learning curve of hill climber
-* Learning curve of GP
-* Learning curve of some variation of the GP
-* learning curves clearly labeled, labeled axes
-* learning curves have error bars
-* Overall correctness of the result
-* Overall efficiency of the algorithm (accuracy versus number of evaluations)
-* Automatically draw tree representing best solution
-* Show video where every frame is data point and best function found so far (include \* link to video online in the PDF, along with a frame from the video)
+- Accuracy vs complexity of all methods
 
-* Accuracy vs complexity of all methods
-
-* Make sure Data submitted is correct
+- Make sure Data submitted is correct
 
 # 1. Results Page
 
 ## Results summary table
+
+| Method        | Configuration | Average |  Best |
+| :------------ | :------------ | ------: | ----: |
+| Random Search | N/a           |   66.40 | 69.80 |
+| Hill Climber  | N/a           |   68.23 | 82.65 |
+| EA            | N/a           |    TODO |  TODO |
 
 # 2. Problem Set Up
 
@@ -75,20 +69,20 @@ Similarly, Plus, Minus, Divide, and Multiply operators are defined to be Express
 
 If I want to evaluate an expression at x, I can do an in order tree traversal of the lambdas, which would give me the lambda that represents the entire expression tree.
 
-# 2. Random Search
+# 3. Random Search
 
-## Description
+## 3.1 Description
 
 Random Search is a special case of a Evolutionary Algorithm with the only constraint that the Reproducer operator would output a random expression for any parents. Note that this puts no constraint on the Selection operator used (it can be anything, but ideally it would take the least amount of compute power possible, as the parent's fitness has no correlation with the child's fitness). Therefore, I just implemented my random search as using the `RandomReproducer`, which outputs a random expression for any two parents.
 
-## Plots
+## 3.2 Plots
 
-### Learning Plot, Dot Plot, Diversity Plot (Respectively)
+### Learning Plot (Top), Dot Plot (Bottom Left), Diversity Plot (Bottom Right)
 
 <div style="clear:both;">
-	<img src="assets\rs\lc.png"width="30%" height="auto" />
-	<img src="assets\rs\dotplot.png"width="30%" height="auto" />
-	<img src="assets\rs\diversity.png"width="30%" height="auto" />
+	<img src="assets\rs\lc.png"width="100%" height="auto" />
+	<img src="assets\rs\dotplot.png"width="49%" height="auto" />
+	<img src="assets\rs\diversity.png"width="49%" height="auto" />
 </div>
 
 As you would expect, the dot plot shows an almost uniform distribution of fitnesses, which suggests great diversity. This is confirmed by the diversity plot. The learning curve is abrupt, as expected. What you would not expect is for a random search to do so well. Most of the final best equations were able to capture the shapes of the dataset quite well.
@@ -103,22 +97,26 @@ As you would expect, the dot plot shows an almost uniform distribution of fitnes
 	<img src="assets\rs\eqn4.png"width="49%" height="auto" />
 </div>
 
-# 3. Hill Climber
+# 4. Hill Climber
 
-## Description
+## 4.1. Description
 
-Similar to Random Search, Hill Climbers are just a special case of Evoluationary Algorithms, with population 1, simulated annealing with initial temperature set to 0, and a 100% mutation rate. In this case, it doesn't matter if the solver is generational or continuous, because only one individual is reproducing, and the individual is reproducing asexually.
+Similar to Random Search, Hill Climbers (HC) are just a special case of Evoluationary Algorithms, with population 1, simulated annealing with initial temperature set to 0, and a 100% mutation rate. In this case, it doesn't matter if the solver is generational or continuous, because only one individual is reproducing, and the individual is reproducing asexually.
 
-## Plots
+What is important when talking about hill climbers is the AsexualReproducer. Unlike other reproducers, this reproducer takes one parent, mutates it until either the offspring has a fitness than the parent, or, by simulated annealing, it is let through. Of course, in HC, temperature is 0 so the child is only let through if it has a higher fitness than the parent.
 
-### Learning Plot and Diversity Plot (Respectively)
+## 4.2. Plots
 
-<div style="clear:both;">
-    <img src="assets\hc\lc.png"width="49%" height="auto" />
-	<img src="assets\hc\diversity.png"width="49%" height="auto" />
+### Learning Plot
+
+<div>
+    <img src="assets\hc\lc.png"/>
+</div>
+<div>
+    <img src="assets\hc\eqn0.png"/>
 </div>
 
-As you would expect, the dot plot shows an almost uniform distribution of fitnesses, which suggests great diversity. This is confirmed by the diversity plot. The learning curve is abrupt, as expected. What you would not expect is for a random search to do so well. Most of the final best equations were able to capture the shapes of the dataset quite well.
+The equation above has a fitness of `82.646`, which is the highest fitness I got for HC. Overall, it does seem like HC performed better than Random Search.
 
 <div style="clear:both;">
 	<img src="assets\hc\eqn1.png"width="49%" height="auto" />
@@ -130,20 +128,39 @@ As you would expect, the dot plot shows an almost uniform distribution of fitnes
 	<img src="assets\hc\eqn4.png"width="49%" height="auto" />
 </div>
 
-# 4. Evolutionary Algorithm
+# 5. Evolutionary Algorithm
 
-## Description
+## 5.1. Description
 
-### Convergence plot
+## 5.1.1. Diversity
 
-# Analysis
+My first attempt at diversity was using Phenotypic diversity, which is a sample of the Absolute Mean Error between two expressions, but this did not prove to be very effective, not only because it took way too long to calculate, but also because it didn't motivate genotypic diversity which is useful for crossing over.
 
-## Fitness Metric
+I ended up using a simple genotypic diversity metric which is the sum of the differences of all types of operators between two expressions. So `sin(x)` and `cos(x)` has a distance of 2 from each other, because the first expression has 1 sin node while the second has none (1 - 0), and the second has 1 cos node while the first has none (0 - 1), and both has a variable (1 - 1). Therefore, their distance is |1-0| + |0-1| + |1-1| = 2. This is more inline with the diversity I wanted to encourage, and I got better results with this.
+
+With more time, I would like to experiment with structural diversity, which somehow takes into account the topology of the expression tree, because I think that might also be very useful for crossing over.
+
+## 5.1.2. Probabilistic Deterministic Crowding
+
+I invented a Reproduction Operator I call Probabilistic Deterministic Crowding. After it reproduces two parents through crossover and mutates the offspring a bit, half of the time, it puts both parents and the offspring back into the population, the other half, my reproduction operator is like deterministic crowding and the child replaces the most similar parents.
+
+When both parents and the offspring is put back into the population, the individual with the worst fitness is removed from the population. This method is able to maintain diversity (child replaces most similar parent), but still ensures a minimum level of improvement in the population's fitness.
+
+## 5.1.3. Selectors
+
+- `Tournament Selector`: This is the standard tournament selector in literature where N individuals are selected at random from the population, and the individual with the highest fitness gets to reproduce. This happens twice to give the two parents that would reproduce.
+- `DiversitySelector`: This selector uses the `TournamentSelector` to "suggest" two individuals with high fitness, and this selector moves forward with the suggested parents only if the parents has a distance value larger than some value K. If this condition is not meet, K is decayed, then the process is repeated. This operator is named this way because it trys to select parents that are as different from each other as stochastically possible.
+- `NichingSelector`: This selector is the opposite of `DiversitySelector`, moving forward with `TournamentSelector`'s suggestion only if the parents' distance value is less than a certain K. If not, K is incremented, then the process is repeated. This Operator aims to create various niches within the population.
+
+##  5.1.4. Mutators
+ - `ConstantMultiplierMutator`: This mutator came out of a conversation I had with Joni the TA about my program's performance. I was concern
+
+# 6. Design Choices
+
+## 6.1. Fitness Metric
 
 The fitness of an individual in my program is given by `100 / (AbsoluteMeanError + 1)`. This metric is nice because it's almost like a progress bar to see how far it is away from have 0 error. When the error approaches infinity, this fitness approaches zero, and when the error approaches 0, the fitness approaches 100. This is also useful for the convergence plot.
 
-## Simpler problems for testing
+## 6.2. Simpler problems for testing
 
 I have a segment of code in `Config.cpp` that would allow me to construct my own dataset rather than use input dataset, which means I'm able to create datasets of `sin(x)`,`cos(x)` and `x`. Usually, simple equations like this arise directly as a result of initialization, so it wasn't too helpful to study how my program would evolve these equations.
-
-TODO try more complicated simple problems for testing
