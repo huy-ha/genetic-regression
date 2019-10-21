@@ -109,7 +109,7 @@ def plot_dir(dir):
     plot_highest_fitness(dir)
 
 
-def avg_learning_curve(runpaths, label, showplot=False):
+def avg_learning_curve(runpaths, label, showplot=False, errorevery=100):
     evals = []
     fitnesses = []
     minLen = 10000000000
@@ -127,7 +127,7 @@ def avg_learning_curve(runpaths, label, showplot=False):
     std = np.std(fitnesses, axis=0) / n_sqrt
     fitnesses = np.mean(fitnesses, axis=0)
     plt.errorbar(evals, fitnesses, yerr=std,
-                 errorevery=1000,
+                 errorevery=errorevery,
                  label=label)
     if showplot:
         plt.legend()
@@ -149,13 +149,6 @@ rs_runs = ["runs/run45-rs/HighestFitness.txt",
            "runs/run48-rs/HighestFitness.txt",
            "runs/run49-rs/HighestFitness.txt"]
 
-
-# hc_runs = ["runs/run50-hc/HighestFitness.txt",
-#            "runs/run51-hc/HighestFitness.txt",
-#            "runs/run52-hc/HighestFitness.txt",
-#            "runs/run53-hc/HighestFitness.txt",
-#            "runs/run54-hc/HighestFitness.txt"]
-
 hc_runs = ["runs/run55-hc/HighestFitness.txt",
            "runs/run56-hc/HighestFitness.txt",
            "runs/run57-hc/HighestFitness.txt",
@@ -163,12 +156,24 @@ hc_runs = ["runs/run55-hc/HighestFitness.txt",
            "runs/run59-hc/HighestFitness.txt",
            "runs/run60-hc/HighestFitness.txt"]
 
+ea_diversity_runs = ["runs/run61-ea-night/HighestFitness.txt",
+                     "runs/run62-ea-night/HighestFitness.txt",
+                     "runs/run63-ea-night/HighestFitness.txt",
+                     "runs/run64-ea-night/HighestFitness.txt",
+                     "runs/run65-ea-night/HighestFitness.txt",
+                     "runs/run66-ea-night/HighestFitness.txt",
+                     "runs/run67-ea-night/HighestFitness.txt",
+                     "runs/run68-ea-night/HighestFitness.txt",
+                     "runs/run69-ea-night/HighestFitness.txt",
+                     "runs/run70-ea-night/HighestFitness.txt"]
+
 
 def plot_lc():
-    avg_learning_curve(rs_runs, "Random Search")
-    # avg_learning_curve(hc_runs, "Hill Climber")
+    avg_learning_curve(ea_runs, "Evolutionary Algorithm", errorevery=100)
+    avg_learning_curve(rs_runs, "Random Search", errorevery=10000)
+    avg_learning_curve(hc_runs, "Hill Climber", errorevery=10)
     # plot_all_runs(hc_runs, "Hill Climber")
-    # plt.xscale("log")
+    plt.xscale("log")
     plt.xlabel("Evaluations")
     plt.ylabel("Fitness")
     plt.legend()

@@ -52,11 +52,10 @@ void ContinuousSolver::Run()
     int saveEval = 0;
     InitializePopulation();
     int round = 0;
-    // Run for at least 10000 rounds
+    // Run for at least 6000 rounds
     // Afterwards, if double evaluations without getting better, quit
-    while (round < 10000 || !ShouldStop())
+    while (round < 6000 || !ShouldStop())
     {
-        cout << "ROUND #" << round << endl;
         EvolveRound();
         for_each(m_population.begin(), m_population.end(), [](auto e) {
             e = Expression::Simplify(e);
