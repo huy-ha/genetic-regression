@@ -5,6 +5,7 @@
 #include <mutex>
 #include "reproducers/Reproducer.hpp"
 #include "selectors/Selector.hpp"
+#include "../engine/OutputLogger.hpp"
 namespace SymbolicRegression
 {
 using namespace std;
@@ -19,6 +20,10 @@ public:
     static void DecayTemp();
     void SavePopulationFitnesses();
     float PopulationDiversity();
+    inline bool ShouldStop()
+    {
+        return m_prevBestEvaluations < OutputLogger::GetEvaluations() / 2;
+    }
 
 protected:
     void InitializePopulation();
@@ -30,6 +35,7 @@ protected:
     shared_ptr<Reproducer> m_reproducer;
     int m_eliteCount = -1;
     float m_prevHighestFitness = -1;
+    int m_prevBestEvaluations = -1;
     shared_ptr<Expression> m_prevBest;
     shared_ptr<Selector> m_selector;
 

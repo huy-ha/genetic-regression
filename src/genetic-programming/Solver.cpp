@@ -6,6 +6,7 @@
 #include "../engine/OutputLogger.hpp"
 #include "reproducers/RandomReproducer.hpp"
 #include "reproducers/MutatorReproducer.hpp"
+#include "reproducers/AsexualReproducer.hpp"
 #include "reproducers/CrossoverMutatorReproducer.hpp"
 #include "selectors/TournamentSelector.hpp"
 #include "selectors/DiversitySelector.hpp"
@@ -35,6 +36,10 @@ Solver::Solver()
     else if (reproducerConfig == "Mutator")
     {
         m_reproducer = shared_ptr<Reproducer>(new MutatorReproducer(m_populationCount));
+    }
+    else if (reproducerConfig == "Asexual")
+    {
+        m_reproducer = shared_ptr<Reproducer>(new AsexualReproducer(m_populationCount));
     }
     else
     {

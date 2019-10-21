@@ -1,5 +1,10 @@
 #include "AsexualReproducer.hpp"
 #include "../Solver.hpp"
+#include "../mutators/ConstantMultiplierMutator.hpp"
+#include "../mutators/ConstantMutator.hpp"
+#include "../mutators/SubexpressionMutator.hpp"
+#include "../mutators/TrigMultiplierMutator.hpp"
+#include "../mutators/TruncateMutator.hpp"
 namespace SymbolicRegression
 {
 shared_ptr<list<shared_ptr<Expression>>> AsexualReproducer::Reproduce(
@@ -13,10 +18,35 @@ shared_ptr<list<shared_ptr<Expression>>> AsexualReproducer::Reproduce(
         auto parent = parents.begin();
         advance(parent, idx);
         shared_ptr<Expression> offspring;
+        int attempts = 0;
         do
         {
             offspring = Expression::Copy(*parent);
-        } while (offspring->Fitness() < (*parent)->Fitness() || Expression::RandomF() < Solver::GetTemp());
+            offspring = ConstantMutator::Mutate(offspring);
+            if (Expression::RandomF() > 0.7f)
+            {
+                //cout  << "cons mult" << endl;
+                offspring = ConstantMultiplierMutator::Mutate(offspring);
+            }
+            if (Expression::RandomF() > 0.7f)
+            {
+                //cout  << "trig mult" << endl;
+                offspring = TrigMultiplierMutator::Mutate(offspring);
+            }
+            if (Expression::RandomF() > 0.7f)
+            {
+                //cout  << "subexp" << endl;
+                offspring = SubexpressionMutator::Mutate(offspring);
+            }
+            if (Expression::RandomF() > 0.7f)
+            {
+                //cout  << "truncate" << endl;
+                offspring = TruncateMutator::Mutate(offspring);
+            }
+            attempts += 1;
+        } while (offspring->Fitness() < (*parent)->Fitness() ||
+                 Expression::RandomF() < Solver::GetTemp() ||
+                 attempts > 1000000);
         if (Expression::IsValid(offspring) && m_offsprings.find(offspring->ToString()) == m_offsprings.end())
         {
             m_offsprings.insert(make_pair(offspring->ToString(), offspring));
