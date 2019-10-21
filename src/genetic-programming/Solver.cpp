@@ -116,10 +116,8 @@ float Solver::PopulationDiversity()
 void Solver::SaveOutput()
 {
     OutputLogger::Clear("FinalBest");
-    m_population.sort(Expression::FitnessComparer);
-    auto finalBest = *m_population.begin();
-    OutputLogger::Log("FinalBest", finalBest->ToString());
-    auto f = finalBest->ToFunction();
+    OutputLogger::Log("FinalBest", m_prevBest->ToString());
+    auto f = m_prevBest->ToFunction();
     for (float x = 0; x < 10; x += 0.001f)
     {
         OutputLogger::Log("FinalBest", to_string(x) + " " + to_string(f(x)));
