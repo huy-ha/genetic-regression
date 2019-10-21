@@ -31,8 +31,6 @@ def get_dir_name(runNumber):
         for run in runs:
             if run.find("run{}".format(runNumber)) is not -1:
                 return "runs/{}/".format(run)
-            else:
-                exit()
     except:
         print("Run {} not found!".format(runNumber))
         exit()
@@ -111,7 +109,7 @@ def plot_dir(dir):
     plot_highest_fitness(dir)
 
 
-def avg_learning_curve(runpaths, label):
+def avg_learning_curve(runpaths, label, showplot=False):
     evals = []
     fitnesses = []
     minLen = 10000000000
@@ -126,12 +124,22 @@ def avg_learning_curve(runpaths, label):
         fitnesses[i] = fitnesses[i][0:minLen]
     n_sqrt = math.sqrt(len(runpaths))
     evals = np.mean(evals, axis=0)
-    std = np.std(fitnesses, axis=0)
+    std = np.std(fitnesses, axis=0) / n_sqrt
     fitnesses = np.mean(fitnesses, axis=0)
     plt.errorbar(evals, fitnesses, yerr=std,
-                 errorevery=10000, label=label)
-    plt.legend()
-    plt.show()
+                 errorevery=1000, label=label)
+    if showplot:
+        plt.legend()
+        plt.show()
+
+
+def plot_all_runs(runpaths, label, showplot=False):
+    for runpath in runpaths:
+        run = read_csv(runpath)
+        plt.plot(run[0], run[1], label=label)
+    if showplot:
+        plt.legend()
+        plt.show()
 
 
 rs_runs = ["runs/run45-rs/HighestFitness.txt",
@@ -140,8 +148,29 @@ rs_runs = ["runs/run45-rs/HighestFitness.txt",
            "runs/run48-rs/HighestFitness.txt",
            "runs/run49-rs/HighestFitness.txt"]
 
-if __name__ == "__main__":
+
+hc_runs = ["runs/run50-hc/HighestFitness.txt",
+           "runs/run51-hc/HighestFitness.txt",
+           "runs/run52-hc/HighestFitness.txt",
+           "runs/run53-hc/HighestFitness.txt",
+           "runs/run54-hc/HighestFitness.txt"]
+
+
+def plot_lc():
     # avg_learning_curve(rs_runs, "Random Search")
+    # avg_learning_curve(hc_runs, "Hill Climber")
+    plot_all_runs(hc_runs, "Hill Climber")
+    # plt.xscale("log")
+    plt.xlabel("Evaluations")
+    plt.ylabel("Fitness")
+    plt.legend()
+    plt.show()
+
+
+if __name__ == "__main__":
+    if(len(sys.argv) == 1):
+        plot_lc()
+        exit()
     # Parse Arguments
     parser = argparse.ArgumentParser(description='Plot a run')
     parser.add_argument(
