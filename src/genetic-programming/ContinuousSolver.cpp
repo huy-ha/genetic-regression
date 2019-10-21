@@ -15,6 +15,9 @@ void ContinuousSolver::EvolveRound()
         for_each(offsprings->begin(), offsprings->end(), [&](auto e) {
             m_population.emplace_front(e);
         });
+        OutputLogger::Log("HighestFitness",
+                          to_string(OutputLogger::GetEvaluations()) +
+                              "," + to_string(m_prevHighestFitness));
         return;
     }
     // select two parents using selector
@@ -52,7 +55,9 @@ void ContinuousSolver::EvolveRound()
     {
         m_population.pop_back();
     }
-    OutputLogger::Log("HighestFitness", to_string(OutputLogger::GetEvaluations()) + "," + to_string(m_prevHighestFitness));
+    OutputLogger::Log("HighestFitness",
+                      to_string(OutputLogger::GetEvaluations()) +
+                          "," + to_string(m_prevHighestFitness));
 }
 
 void ContinuousSolver::Run()
@@ -92,6 +97,7 @@ void ContinuousSolver::Run()
             prevBestEvaluations = OutputLogger::GetEvaluations();
             cout << "FITNESS: " << m_prevHighestFitness << " | Temp " << GetTemp() << endl;
             cout << "\t" << m_prevBest->ToString() << endl;
+            SaveOutput();
         }
         DecayTemp();
         SavePopulationFitnesses();
