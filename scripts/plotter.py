@@ -127,7 +127,8 @@ def avg_learning_curve(runpaths, label, showplot=False):
     std = np.std(fitnesses, axis=0) / n_sqrt
     fitnesses = np.mean(fitnesses, axis=0)
     plt.errorbar(evals, fitnesses, yerr=std,
-                 errorevery=1000, label=label)
+                 errorevery=1000,
+                 label=label)
     if showplot:
         plt.legend()
         plt.show()
@@ -149,17 +150,24 @@ rs_runs = ["runs/run45-rs/HighestFitness.txt",
            "runs/run49-rs/HighestFitness.txt"]
 
 
-hc_runs = ["runs/run50-hc/HighestFitness.txt",
-           "runs/run51-hc/HighestFitness.txt",
-           "runs/run52-hc/HighestFitness.txt",
-           "runs/run53-hc/HighestFitness.txt",
-           "runs/run54-hc/HighestFitness.txt"]
+# hc_runs = ["runs/run50-hc/HighestFitness.txt",
+#            "runs/run51-hc/HighestFitness.txt",
+#            "runs/run52-hc/HighestFitness.txt",
+#            "runs/run53-hc/HighestFitness.txt",
+#            "runs/run54-hc/HighestFitness.txt"]
+
+hc_runs = ["runs/run55-hc/HighestFitness.txt",
+           "runs/run56-hc/HighestFitness.txt",
+           "runs/run57-hc/HighestFitness.txt",
+           "runs/run58-hc/HighestFitness.txt",
+           "runs/run59-hc/HighestFitness.txt",
+           "runs/run60-hc/HighestFitness.txt"]
 
 
 def plot_lc():
-    # avg_learning_curve(rs_runs, "Random Search")
+    avg_learning_curve(rs_runs, "Random Search")
     # avg_learning_curve(hc_runs, "Hill Climber")
-    plot_all_runs(hc_runs, "Hill Climber")
+    # plot_all_runs(hc_runs, "Hill Climber")
     # plt.xscale("log")
     plt.xlabel("Evaluations")
     plt.ylabel("Fitness")
