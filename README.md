@@ -42,20 +42,19 @@ Grace Hours left: 75 hours
 - Overall efficiency of the algorithm (accuracy versus number of evaluations)
 - Automatically draw tree representing best solution
 - Show video where every frame is data point and best function found so far (include \* link to video online in the PDF, along with a frame from the video)
-
 - Accuracy vs complexity of all methods
-
-- Make sure Data submitted is correct
 
 # 1. Results Page
 
 ## Results summary table
 
-| Method        | Configuration | Average |  Best |
-| :------------ | :------------ | ------: | ----: |
-| Random Search | N/a           |   66.40 | 69.80 |
-| Hill Climber  | N/a           |   68.23 | 82.65 |
-| EA            | N/a           |    TODO |  TODO |
+| Method              | Configuration                           | Average |  Best |
+| :------------------ | :-------------------------------------- | ------: | ----: |
+| Random Search       | N/a                                     |   66.40 | 69.80 |
+| Hill Climber        | N/a                                     |   68.23 | 82.65 |
+| EA                  | Population size 50, Diversity Selector  |    TODO |  TODO |
+| Niching EA          | Population size 50, Niching Selector    |    TODO |  TODO |
+| Large Population EA | Population size 500, Diversity Selector |    TODO |  TODO |
 
 # 2. Problem Set Up
 
@@ -107,6 +106,24 @@ What is important when talking about hill climbers is the AsexualReproducer. Unl
 
 ## 4.2. Plots
 
+## Hyperparameters
+
+Below are the hyperparameters I used for Hill Climber
+
+```
+Input data.txt
+PopulationCount 1
+GenerationCount 100000
+MaxDepth 15
+MinThreads 5
+MaxThreads 100
+Reproducer Asexual
+Solver Continuous
+MutationRetries 50
+Init_T 0
+T_decay 1
+```
+
 ### Learning Plot
 
 <div>
@@ -146,14 +163,24 @@ I invented a Reproduction Operator I call Probabilistic Deterministic Crowding. 
 
 When both parents and the offspring is put back into the population, the individual with the worst fitness is removed from the population. This method is able to maintain diversity (child replaces most similar parent), but still ensures a minimum level of improvement in the population's fitness.
 
-## 5.1.3. Selectors
+## 5.1.3. Solver
+
+- `GenerationalSolver`: - The algorithm for this solver can be described as: 1. Use a selector to choose M parents 2. Create N (population size) offsprings from the parents 3. Replace the current population with the offspring 4. Repeat - This was what I used for my first assignment, but this did not give me very good results. I think this is because it removes too many good solutions from population in step 3. Further, it does not follow the motto of EA: "incremental progress".
+- `ContinuousSolver`: - The algorithm for this solver can be described as: 1. Use a selector to choose 2 parents 2. Create 1 offspring from 2 parents 3. Decide which of the three individuals to keep and put back to the population. 4. Repeat - Not only does this solver resolves the two disadvantages of the previous solver, it also allows for the flexibility of a protocol for choosing how to handle choosing who to keep from the parents and the offspring. - Indeed, as expected, the results from this solver is better than the `GenerationalSolver`, so you will only see me discuss results from the `ContinuousSolver`.
+
+## 5.1.4. Selectors
 
 - `Tournament Selector`: This is the standard tournament selector in literature where N individuals are selected at random from the population, and the individual with the highest fitness gets to reproduce. This happens twice to give the two parents that would reproduce.
 - `DiversitySelector`: This selector uses the `TournamentSelector` to "suggest" two individuals with high fitness, and this selector moves forward with the suggested parents only if the parents has a distance value larger than some value K. If this condition is not meet, K is decayed, then the process is repeated. This operator is named this way because it trys to select parents that are as different from each other as stochastically possible.
 - `NichingSelector`: This selector is the opposite of `DiversitySelector`, moving forward with `TournamentSelector`'s suggestion only if the parents' distance value is less than a certain K. If not, K is incremented, then the process is repeated. This Operator aims to create various niches within the population.
 
-##  5.1.4. Mutators
- - `ConstantMultiplierMutator`: This mutator came out of a conversation I had with Joni the TA about my program's performance. I was concern
+## 5.1.5. Mutators
+
+- `ConstantMultiplier`: This mutator came out of a conversation I had with Joni the TA about my program's performance. He noted that my expressions did not have a global constant multiplier term. This mutator aims to resolve this, because when it is called to mutate an expression, it multiplies the expression by a constant and keeps the resulting expression if it has a higher fitness.
+- `TrigMultiplier`: This mutator is similar to `ConstantMutator`, but it multiplies a trig function rather than a constant.
+- `ConstantMutator`: finds a constant and mutates its k value
+- `SubexpressionMutator`: Finds a subexpression tree, and swaps it out with a random expression tree. This is really only useful when the subexpression tree is not too large compared to the size of the full tree.
+- `TruncateMutator`: Replaces a subexpression tree with a constant of random value
 
 # 6. Design Choices
 
