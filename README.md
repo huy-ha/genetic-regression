@@ -26,18 +26,11 @@ Grace Hours left: 75 hours
 ## TODO
 
 - All performance curves in one plot
-- Include all GA configs
-
-- Result page showing information requested
 - Code included (8pt courier single spacing)
 - Convergence plot for any one of the methods
 - Plot showing accuracy vs complexity (of all evaluations
-- Description of EA variation operators used
-- Description of EA selection methods used
 - Analysis of performance. Did it work? Why or why not?
-- Learning curve of GP
 - Learning curve of some variation of the GP
-- learning curves have error bars
 - Overall correctness of the result
 - Overall efficiency of the algorithm (accuracy versus number of evaluations)
 - Automatically draw tree representing best solution
@@ -52,13 +45,17 @@ Grace Hours left: 75 hours
 | :------------------ | :-------------------------------------- | ------: | ----: |
 | Random Search       | N/a                                     |   66.40 | 69.80 |
 | Hill Climber        | N/a                                     |   68.23 | 82.65 |
-| EA                  | Population size 50, Diversity Selector  |    TODO |  TODO |
-| Niching EA          | Population size 50, Niching Selector    |    TODO |  TODO |
-| Large Population EA | Population size 500, Diversity Selector |    TODO |  TODO |
+| Base GP             | Population size 50, Diversity Selector  |    TODO |       |
+| Tournament GP       | Population size 50, Tournament Selector |    TODO | 99.90 |
+| Large Population GP | Population size 500, Diversity Selector |    TODO |  TODO |
+
+TODO insert summary graph here
+
+<div style="page-break-after: always;"></div>
 
 # 2. Problem Set Up
 
-## 2.1 Representation of Genotype
+## 2.1. Representation of Genotype
 
 For my genotype, I used an Expression Tree, where each Node has a lambda function that takes in a float and outputs a float, and a list of its child expressions. The lambda function would make use of its child expression's functions somehow.
 
@@ -68,11 +65,48 @@ Similarly, Plus, Minus, Divide, and Multiply operators are defined to be Express
 
 If I want to evaluate an expression at x, I can do an in order tree traversal of the lambdas, which would give me the lambda that represents the entire expression tree.
 
+## 2.2. Diversity
+
+My first attempt at diversity was using Phenotypic diversity, which is a sample of the Absolute Mean Error between two expressions, but this did not prove to be very effective, not only because it took way too long to calculate, but also because it didn't motivate genotypic diversity which is useful for crossing over.
+
+I ended up using a simple genotypic diversity metric which is the sum of the differences of all types of operators between two expressions. So `sin(x)` and `cos(x)` has a distance of 2 from each other, because the first expression has 1 sin node while the second has none (1 - 0), and the second has 1 cos node while the first has none (0 - 1), and both has a variable (1 - 1). Therefore, their distance is |1-0| + |0-1| + |1-1| = 2. This is more inline with the diversity I wanted to encourage, and I got better results with this.
+
+With more time, I would like to experiment with structural diversity, which somehow takes into account the topology of the expression tree, because I think that might also be very useful for crossing over.
+
+## 2.3. Probabilistic Deterministic Crowding
+
+I invented a Reproduction Operator I call Probabilistic Deterministic Crowding. After it reproduces two parents through crossover and mutates the offspring a bit, half of the time, it puts both parents and the offspring back into the population, the other half, my reproduction operator is like deterministic crowding and the child replaces the most similar parents.
+
+When both parents and the offspring is put back into the population, the individual with the worst fitness is removed from the population. I hypothesized that the method would able to maintain diversity (child replaces most similar parent), but still ensures a minimum level of improvement in the population's fitness.
+
+Unfortunately, this method did not perform as well as I expected. It was slow because some the weakest individuals were unlikely to be removed from the population, yet the diversity still decayed too quickly with time. In other words, it inherited the worst properties of both methods.
+
+I ended up just keeping the parent in the population and adding the offspring to the population. Then, when the population size is too large, I remove individuals from the bottom.
+
+## 2.4. Solver
+
+- `GenerationalSolver`: - The algorithm for this solver can be described as: 1. Use a selector to choose M parents 2. Create N (population size) offsprings from the parents 3. Replace the current population with the offspring 4. Repeat - This was what I used for my first assignment, but this did not give me very good results. I think this is because it removes too many good solutions from population in step 3. Further, it does not follow the motto of GP: "incremental progress".
+- `ContinuousSolver`: - The algorithm for this solver can be described as: 1. Use a selector to choose 2 parents 2. Create 1 offspring from 2 parents 3. Decide which of the three individuals to keep and put back to the population. 4. Repeat - Not only does this solver resolves the two disadvantages of the previous solver, it also allows for the flexibility of a protocol for choosing how to handle choosing who to keep from the parents and the offspring. - Indeed, as expected, the results from this solver is better than the `GenerationalSolver`, so you will only see me discuss results from the `ContinuousSolver`.
+
+## 2.5. Selectors
+
+- `Tournament Selector`: This is the standard tournament selector in literature where N individuals are selected at random from the population, and the individual with the highest fitness gets to reproduce. This happens twice to give the two parents that would reproduce.
+- `DiversitySelector`: This selector uses the `TournamentSelector` to "suggest" two individuals with high fitness, and this selector moves forward with the suggested parents only if the parents has a distance value larger than some value K. If this condition is not meet, K is decayed, then the process is repeated. This operator is named this way because it trys to select parents that are as different from each other as stochastically possible.
+- `NichingSelector`: This selector is the opposite of `DiversitySelector`, moving forward with `TournamentSelector`'s suggestion only if the parents' distance value is less than a certain K. If not, K is incremented, then the process is repeated. This Operator aims to create various niches within the population.
+
+## 2.6. Mutators
+
+- `ConstantMultiplier`: This mutator came out of a conversation I had with Joni the TA about my program's performance. He noted that my expressions did not have a global constant multiplier term. This mutator aims to resolve this, because when it is called to mutate an expression, it multiplies the expression by a constant and keeps the resulting expression if it has a higher fitness.
+- `TrigMultiplier`: This mutator is similar to `ConstantMutator`, but it multiplies a trig function rather than a constant.
+- `ConstantMutator`: finds a constant and mutates its k value
+- `SubexpressionMutator`: Finds a subexpression tree, and swaps it out with a random expression tree. This is really only useful when the subexpression tree is not too large compared to the size of the full tree.
+- `TruncateMutator`: Replaces a subexpression tree with a constant of random value
+
 # 3. Random Search
 
 ## 3.1 Description
 
-Random Search is a special case of a Evolutionary Algorithm with the only constraint that the Reproducer operator would output a random expression for any parents. Note that this puts no constraint on the Selection operator used (it can be anything, but ideally it would take the least amount of compute power possible, as the parent's fitness has no correlation with the child's fitness). Therefore, I just implemented my random search as using the `RandomReproducer`, which outputs a random expression for any two parents.
+Random Search is a special case of a Genetic Programming with the only constraint that the Reproducer operator would output a random expression for any parents. Note that this puts no constraint on the Selection operator used (it can be anything, but ideally it would take the least amount of compute power possible, as the parent's fitness has no correlation with the child's fitness). Therefore, I just implemented my random search as using the `RandomReproducer`, which outputs a random expression for any two parents.
 
 ## 3.2 Plots
 
@@ -145,44 +179,110 @@ The equation above has a fitness of `82.646`, which is the highest fitness I got
 	<img src="assets\hc\eqn4.png"width="49%" height="auto" />
 </div>
 
-# 5. Evolutionary Algorithm
+# 5. Genetic Programming (GP)
 
 ## 5.1. Description
 
-## 5.1.1. Diversity
+I experimented with various configurations of GP:
 
-My first attempt at diversity was using Phenotypic diversity, which is a sample of the Absolute Mean Error between two expressions, but this did not prove to be very effective, not only because it took way too long to calculate, but also because it didn't motivate genotypic diversity which is useful for crossing over.
+- `Base GP`: This GP uses the `DiversitySelector` (described above) with the continuous to select two parents (which in turn uses `TournamentSelector`). The expression tree of the parents are crossed over at a random point, which gives the base of the child. Then the child has some probability of mutating through all of the mutators described above. The child is then inserted into the population, then the individual with the lowest fitness is removed, and the cycle repeats. A population size of 50 is used.
+- `Tournament GP`: similar to `Base GP`, but uses vanilla `TournamentSelector`.
+- `Large Population GP`: as the name implies, this configurations tries to see if a large population of 500 would outperform a smaller population. I expect that it has a slower convergence, but would reach a better solution than smaller populations.
 
-I ended up using a simple genotypic diversity metric which is the sum of the differences of all types of operators between two expressions. So `sin(x)` and `cos(x)` has a distance of 2 from each other, because the first expression has 1 sin node while the second has none (1 - 0), and the second has 1 cos node while the first has none (0 - 1), and both has a variable (1 - 1). Therefore, their distance is |1-0| + |0-1| + |1-1| = 2. This is more inline with the diversity I wanted to encourage, and I got better results with this.
+## 5.2. Base GP
 
-With more time, I would like to experiment with structural diversity, which somehow takes into account the topology of the expression tree, because I think that might also be very useful for crossing over.
+## 5.3. Tournament GP
 
-## 5.1.2. Probabilistic Deterministic Crowding
+Below are the hyperparameters I used for the Base GP
 
-I invented a Reproduction Operator I call Probabilistic Deterministic Crowding. After it reproduces two parents through crossover and mutates the offspring a bit, half of the time, it puts both parents and the offspring back into the population, the other half, my reproduction operator is like deterministic crowding and the child replaces the most similar parents.
+```
+Input data.txt
+Solver Continuous
+Reproducer CrossoverMutator
+Selector Diversity
+PopulationCount 50
+TournamentPlayersCount 4
+MutationRetries 8
+MaxDepth 10
+MinThreads 5
+MaxThreads 100
+Init_T 0.5
+T_decay 0.999
+```
 
-When both parents and the offspring is put back into the population, the individual with the worst fitness is removed from the population. This method is able to maintain diversity (child replaces most similar parent), but still ensures a minimum level of improvement in the population's fitness.
+## Hyperparameters
 
-## 5.1.3. Solver
+Below are the hyperparameters I used for the Tournament GP
 
-- `GenerationalSolver`: - The algorithm for this solver can be described as: 1. Use a selector to choose M parents 2. Create N (population size) offsprings from the parents 3. Replace the current population with the offspring 4. Repeat - This was what I used for my first assignment, but this did not give me very good results. I think this is because it removes too many good solutions from population in step 3. Further, it does not follow the motto of EA: "incremental progress".
-- `ContinuousSolver`: - The algorithm for this solver can be described as: 1. Use a selector to choose 2 parents 2. Create 1 offspring from 2 parents 3. Decide which of the three individuals to keep and put back to the population. 4. Repeat - Not only does this solver resolves the two disadvantages of the previous solver, it also allows for the flexibility of a protocol for choosing how to handle choosing who to keep from the parents and the offspring. - Indeed, as expected, the results from this solver is better than the `GenerationalSolver`, so you will only see me discuss results from the `ContinuousSolver`.
+```
+Input data.txt
+Solver Continuous
+Reproducer CrossoverMutator
+Selector Tournament
+PopulationCount 50
+TournamentPlayersCount 4
+MutationRetries 8
+MaxDepth 10
+MinThreads 5
+MaxThreads 100
+Init_T 0.5
+T_decay 0.999
+```
 
-## 5.1.4. Selectors
+<div>
+    <img src="assets\ea-tournament\eqn1.png"/>
+</div>
+<div>
+    <img src="assets\ea-tournament\eqn1-lr.png" height=auto width="32%"/>
+	<img src="assets\ea-tournament\eqn1-dotplot.png" height=auto width="32%"/>
+	<img src="assets\ea-tournament\eqn1-diversity.png" height=auto width="32%"/>
+</div>
 
-- `Tournament Selector`: This is the standard tournament selector in literature where N individuals are selected at random from the population, and the individual with the highest fitness gets to reproduce. This happens twice to give the two parents that would reproduce.
-- `DiversitySelector`: This selector uses the `TournamentSelector` to "suggest" two individuals with high fitness, and this selector moves forward with the suggested parents only if the parents has a distance value larger than some value K. If this condition is not meet, K is decayed, then the process is repeated. This operator is named this way because it trys to select parents that are as different from each other as stochastically possible.
-- `NichingSelector`: This selector is the opposite of `DiversitySelector`, moving forward with `TournamentSelector`'s suggestion only if the parents' distance value is less than a certain K. If not, K is incremented, then the process is repeated. This Operator aims to create various niches within the population.
+Above is the graph plot (top), learning curve (bottom left), dot plot (bottom center), and diversity plot (bottom right). The Diversity plot clearly illustrates the effectiveness of the diversity, while the fitness dot plot shows that my population was able to find a diverse set of solutions that are all quite good. The best one, given by the equation:
 
-## 5.1.5. Mutators
+    0.998*((sin((((x+0.000)-6.287)-6.287)) - 1.268) + sin((0.863 + x)))*sin((x+0.000)) * -1.382
 
-- `ConstantMultiplier`: This mutator came out of a conversation I had with Joni the TA about my program's performance. He noted that my expressions did not have a global constant multiplier term. This mutator aims to resolve this, because when it is called to mutate an expression, it multiplies the expression by a constant and keeps the resulting expression if it has a higher fitness.
-- `TrigMultiplier`: This mutator is similar to `ConstantMutator`, but it multiplies a trig function rather than a constant.
-- `ConstantMutator`: finds a constant and mutates its k value
-- `SubexpressionMutator`: Finds a subexpression tree, and swaps it out with a random expression tree. This is really only useful when the subexpression tree is not too large compared to the size of the full tree.
-- `TruncateMutator`: Replaces a subexpression tree with a constant of random value
+which can be simplified to:
 
-# 6. Design Choices
+    1.379 * (sin(x - 12.574 ) - 1.268 + sin(0.863 + x)) * sin(x)
+
+or, because to simplify the sin function is periodic:
+
+    1.379 * (sin(x) - 1.268 + sin(PI/4 + x)) * sin(x)
+
+This equation has the fitness of `99.9023`, and was found through `Tournament GP`.
+
+Below are some graphs of other equations found by `Tournament GP`:
+
+<div style="clear:both;">
+	<img src="assets\ea-tournament\eqn74.png"width="49%" height="auto" />
+	<img src="assets\ea-tournament\eqn77.png"width="49%" height="auto" />
+</div>
+
+<div style="clear:both;">
+	<img src="assets\ea-tournament\eqn79.png"width="100%" height="auto" />
+</div>
+
+## 5.4. Large Population GP
+
+Below are the hyperparameters I used for the Large Population GP
+
+```
+Input data.txt
+Solver Continuous
+Reproducer CrossoverMutator
+Selector Diversity
+PopulationCount 500
+TournamentPlayersCount 4
+MutationRetries 8
+MaxDepth 10
+MinThreads 5
+MaxThreads 100
+Init_T 0.5
+T_decay 0.999
+```
+
+# 6. Analysis of Methods
 
 ## 6.1. Fitness Metric
 
@@ -191,3 +291,9 @@ The fitness of an individual in my program is given by `100 / (AbsoluteMeanError
 ## 6.2. Simpler problems for testing
 
 I have a segment of code in `Config.cpp` that would allow me to construct my own dataset rather than use input dataset, which means I'm able to create datasets of `sin(x)`,`cos(x)` and `x`. Usually, simple equations like this arise directly as a result of initialization, so it wasn't too helpful to study how my program would evolve these equations.
+
+## 6.3. Conclusion
+
+Overall, my `Tournament GP` was able to find the highest fitness of `99.90`. I have read in literature that Tournament Selector is usually a good go to selector for most problems because the selection pressure can easily be changed by changing the tournament size, and it has nice convergence as well as exploration properties. My studies have confirmed this.
+
+I expected HillClimber to do worse than GP simply because the space of all mathematical expressions that can be represented by an expression tree of max depth 10 is very large, so it loses out on not only the presence of other individuals in the population to crossover with, but also of exploring slightly worse solutions to get to better ones later on.
