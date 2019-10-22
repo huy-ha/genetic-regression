@@ -109,7 +109,7 @@ def plot_dir(dir):
     plot_highest_fitness(dir)
 
 
-def avg_learning_curve(runpaths, label, showplot=False, errorevery=100):
+def avg_learning_curve(runpaths, label, showplot=False):
     evals = []
     fitnesses = []
     minLen = 10000000000
@@ -122,22 +122,27 @@ def avg_learning_curve(runpaths, label, showplot=False, errorevery=100):
     for i in range(len(evals)):
         evals[i] = evals[i][0:minLen]
         fitnesses[i] = fitnesses[i][0:minLen]
+
     n_sqrt = math.sqrt(len(runpaths))
     evals = np.mean(evals, axis=0)
     std = np.std(fitnesses, axis=0) / n_sqrt
     fitnesses = np.mean(fitnesses, axis=0)
-    plt.errorbar(evals, fitnesses, yerr=std,
-                 errorevery=errorevery,
-                 label=label)
+    plt.plot(evals, fitnesses, label=label)
+    plt.fill_between(evals, fitnesses+std, fitnesses-std, alpha=0.3)
+
     if showplot:
         plt.legend()
         plt.show()
 
 
 def plot_all_runs(runpaths, label, showplot=False):
+    prevy = None
     for runpath in runpaths:
         run = read_csv(runpath)
         plt.plot(run[0], run[1], label=label)
+        if prevy != None:
+            plt.fill_between(run[0], prevy, run[1])
+            prevy = run[1]
     if showplot:
         plt.legend()
         plt.show()
@@ -163,15 +168,34 @@ ea_diversity_runs = ["runs/run61-ea-night/HighestFitness.txt",
                      "runs/run65-ea-night/HighestFitness.txt",
                      "runs/run66-ea-night/HighestFitness.txt",
                      "runs/run67-ea-night/HighestFitness.txt",
-                     "runs/run68-ea-night/HighestFitness.txt",
+                     "runs/run68-ea-night/HighestFitness.txt",  # potentially messed up
                      "runs/run69-ea-night/HighestFitness.txt",
                      "runs/run70-ea-night/HighestFitness.txt"]
 
 
+ea_tournament_runs = [
+    "runs/run71-ea-tournament/HighestFitness.txt",
+    "runs/run72-ea-tournament/HighestFitness.txt",
+    "runs/run73-ea-tournament/HighestFitness.txt",
+    "runs/run74-ea-tournament/HighestFitness.txt",
+    "runs/run75-ea-tournament/HighestFitness.txt",
+    "runs/run77-ea-tournament/HighestFitness.txt",
+    "runs/run77-ea-tournament/HighestFitness.txt",
+    "runs/run78-ea-tournament/HighestFitness.txt",  # potentially messed up
+    "runs/run79-ea-tournament/HighestFitness.txt",
+    "runs/run80-ea-tournament/HighestFitness.txt"]
+
+
 def plot_lc():
-    avg_learning_curve(ea_runs, "Evolutionary Algorithm", errorevery=100)
-    avg_learning_curve(rs_runs, "Random Search", errorevery=10000)
-    avg_learning_curve(hc_runs, "Hill Climber", errorevery=10)
+    avg_learning_curve(ea_diversity_runs,
+                       "GP Diversity Selector")
+    avg_learning_curve(ea_tournament_runs,
+                       "GP Tournament Selector")
+    avg_learning_curve(rs_runs, "Random Search")
+    avg_learning_curve(hc_runs, "Hill Climber")
+    # plot_all_runs(ea_tournament_runs, "GP Tournament Selector")
+    # plot_all_runs(ea_diversity_runs, "GP Diversity Selector")
+    # plot_all_runs(rs_runs, "Random Search")
     # plot_all_runs(hc_runs, "Hill Climber")
     plt.xscale("log")
     plt.xlabel("Evaluations")
